@@ -179,8 +179,8 @@ def update_ingredient(ingredient_id: str, new_ingredient_name_id: str, new_quant
                     f', IngredientUnitID = {new_unit_id} ' \
                     f'WHERE IngredientID = {ingredient_id}'
     execute_update_script(update_script)
-
     # TODO: Check if the ingredient has been changed to something that alters the vegetarian status
+
 
 def create_header(new_recipe_name: str, new_recipe_time: int
                   , new_recipe_servings: int, new_recipe_source: str, new_creationGMT: str, recipe_type_id: str):
