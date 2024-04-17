@@ -1,0 +1,16 @@
+<div class="nutrition-facts-section font-standard font-size-standard">
+    <div class="page-section-title">- Nutrition per Serving -</div>
+    {% for fact in nutrition_facts: %}
+        <div class="nutrition-element black-border">
+            <div class="nutrition-value black-border font-size-small">
+                {{ fact['NutritionValue'] }}{{ fact['Units'] }}
+            </div>
+            <div class="font-size-small">
+                {{ fact['ElementName'] }}
+            </div>
+        </div>
+    {% endfor %}
+    <div class="font-size-tiny centered">
+        <a href="{{ url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id=-1) }}">[Edit]</a>
+    </div>
+</div>

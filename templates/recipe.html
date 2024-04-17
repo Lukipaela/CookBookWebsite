@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+Recipe
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+        <div class="theme-background"></div>
+
+        <div class="body">
+            <!-- recipe sidebar -->
+            {% include "recipe_sidebar.html" %}
+            <!-- Main recipe area -->
+            {% include "recipe_main_area.html" %}
+            <!-- Footer-->
+            {% include "footer.html" %}
+        </div>
+
+{% endblock %}

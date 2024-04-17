@@ -1,0 +1,33 @@
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+Database Editor
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+        <div class="theme-background"></div>
+
+        <div class="body">
+            <div class="nav-button font-standard recipe-sidebar-buttons">
+                <a class="btn btn-info" href="{{ url_for('home') }}" role="button">Home</a>
+            </div>
+
+            <form method="POST" action="{{ url_for('database') }}" novalidate>
+                <div>{{ form.SQL_string.label(class="font-standard font-size-large") }}</div>
+                <div>{{ form.SQL_string(class="text-area-entry") }}</div>
+                <div class="nav-button">
+                    {{ form.submit(class="btn btn-warning submit-button font-standard") }}
+                </div>
+                <div class="font-standard">{{ form.response.label(class="font-standard font-size-large") }}</div>
+                <div disabled>{{ form.response(class="text-area-entry", disabled="true") }}</div>
+            </form>
+
+            <!-- Footer-->
+            {% include "footer.html" %}
+        </div>
+{% endblock %}

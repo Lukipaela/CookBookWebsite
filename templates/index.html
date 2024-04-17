@@ -1,0 +1,32 @@
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+Home
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+        <div class="theme-background"></div>
+
+        <div class="body">
+
+            <!--  recipe search widget -->
+            {% include "widget_search.html" %}
+
+            <!--  recipe search results widget -->
+            {% include "widget_search_results.html" %}
+
+            <!-- recent recipes widget -->
+            {% include "widget_recent_recipes.html" %}
+
+            <!--  new recipe widget -->
+            {% include "widget_new_recipe.html" %}
+
+            <!-- Footer-->
+            {% include "footer.html" %}
+        </div>
+{% endblock %}

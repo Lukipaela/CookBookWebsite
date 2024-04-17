@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+    Edit Recipe
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+    <div class="theme-background"></div>
+    <div class="body">
+        <div class="nav-button font-standard">
+            {% if recipe_id == '-1' %}
+                <a class="btn btn-info" href="{{ url_for('recipe', recipe_id=recipe_id) }}" role="button">Back to Recipe</a>
+            {% else %}
+                <a class="btn btn-info" href="{{ url_for('home') }}" role="button">Home</a>
+            {% endif %}
+        </div>
+        <div class="editor-section font-standard">
+            <div class="font-size-large font-highlight editor-section-title">EDIT RECIPE</div>
+            <div class="font-size-standard font-highlight editor-section-message">{{ banner_message }}</div>
+            <form method="POST" action="{{ url_for('edit_header', recipe_id=recipe_id, banner_message='') }}" novalidate>
+                <div class="font-size-standard font-standard ">{{ form.recipe_name.label }}: {{ form.recipe_name(class="text-entry-long") }}</div>
+                <div class="font-size-tiny font-standard">Recipe ID: {{ recipe_id }}</div>
+                <br>
+                <div class="font-size-standard font-standard">{{ form.recipe_time.label }}: {{ form.recipe_time(class="text-entry-small", min=0, max=600) }} minutes  | {{ form.recipe_servings.label }}: {{ form.recipe_servings(class="text-entry-small", min=1, max=30) }}</div>
+                <br>
+                <div class="font-size-standard font-standard">{{ form.recipe_source.label }}: {{ form.recipe_source(class="text-entry-long") }}</div>
+                <br>
+                <div class="font-size-standard font-standard">{{ form.recipe_type.label }}: {{ form.recipe_type(class="combo-wide") }}</div>
+                <br>
+                <div class="hidden-fields">
+                    {{ form.recipe_creationGMT(class="hidden-fields") }}
+                    {{ form.recipe_id(class="hidden-fields") }}
+                </div>
+                <div class="nav-button">
+                    {{ form.submit(class="btn btn-warning submit-button font-standard") }}
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

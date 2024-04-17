@@ -1,0 +1,14 @@
+<div class="recipe-title-section font-highlight">
+    <div class="font-size-large">{{ recipe_header[0]['RecipeName'] }}</div>
+    <div class="font-size-standard">Cook time: {{ recipe_header[0]['CookingTime'] }}m  |  Servings: {{ recipe_header[0]['Servings'] }}</div>
+    <div class="font-size-tiny"><a href="{{ url_for('edit_header', recipe_id=recipe_id, banner_message='') }}">[Edit]</a> </div>
+    {% if badges|length != 0 %}
+        <div class="badges">
+            {% for badge in badges: %}
+                <div class="badge-image black-border">
+                    <img src="../static/assets/ico/badges/{{ badge['BadgeIconAddress'] }}.png" alt="{{ badge['BadgeName'] }}" title="{{ badge['BadgeName'] }}">
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

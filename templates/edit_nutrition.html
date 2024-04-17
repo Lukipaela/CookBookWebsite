@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+    Edit Instructions
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+    <div class="theme-background"></div>
+    <div class="body">
+        <div class="nav-button font-standard">
+            <a class="btn btn-info" href="{{ url_for('recipe', recipe_id=recipe_id) }}" role="button">Back to Recipe</a>
+        </div>
+        <div class="editor-section font-standard font-size-standard">
+            <div class="font-size-large font-highlight editor-section-title">EDIT NUTRITION</div>
+            <div class="font-size-standard font-highlight editor-section-message">{{ banner_message }}</div>
+            <form method="POST" action="{{ url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id=nutrition_id) }}" novalidate>
+                <div class="existing-nutrition-display">
+                    {% for fact in nutrition_facts: %}
+                        <!-- do not show fact if it is being edited currently -->
+                        {% if nutrition_id | int != fact['NutritionID'] %}
+                            <div class="nutrition-element-edit-display">
+                                <div class="nutrition-element black-border">
+                                    <div class="nutrition-value black-border font-size-small">
+                                        {{ fact['NutritionValue'] }}{{ fact['Units'] }}
+                                    </div>
+                                    <div class="font-size-small">
+                                        {{ fact['ElementName'] }}
+                                    </div>
+                                </div>
+                                {% if nutrition_id == '-1' %}
+                                    <div class="font-size-tiny centered">
+                                        <a href="{{ url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id=fact['NutritionID']) }}">[Edit]</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% if nutrition_id == '-1' %}
+                    <!-- only show the 'add' button if we are in default view -->
+                    <div class="nav-button font-standard">
+                        <a class="btn btn-success" href="{{ url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id='0') }}" role="button">Add Fact</a>
+                    </div>
+                {% endif %}
+                <!-- ADD INPUT FIELDS HERE -->
+                {% if nutrition_id != '-1' %}
+                <div class="nutrition-entry-table">
+                    <table>
+                        <tr>
+                            <td class="nutrition-entry-table-label">{{ form.nutrition_name.label(class="nutrition-label") }}</td>
+                            <td class="nutrition-entry-table-field">{{ form.nutrition_name(class="combo-standard") }}</td>
+                        </tr>
+                        <tr>
+                            <td class="nutrition-entry-table-label">{{ form.nutrition_value.label(class="nutrition-label") }}</td>
+                            <td class="nutrition-entry-table-field">{{ form.nutrition_value(class="combo-standard") }}</td>
+                        </tr>
+                        <tr>
+                            <td class="nutrition-entry-table-label">{{ form.nutrition_unit.label(class="nutrition-label") }}</td>
+                            <td class="nutrition-entry-table-field">{{ form.nutrition_unit(class="combo-standard") }}</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <td class="nutrition-entry-table-label">
+                        <a class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</a>
+                    </td>
+                    <td class="nutrition-entry-table-field">
+                        <a class="btn btn-danger" href="{{ url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id='-1', banner_message='Add Element cancelled!') }}" role="button">Cancel</a>
+                    </td>
+                </div>
+                {% endif %}
+                <div class="hidden-fields">
+                    {{ form.nutrition_id(class="hidden-fields") }}
+                    {{ form.recipe_id(class="hidden-fields") }}
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

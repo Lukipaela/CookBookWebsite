@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+    Edit Instructions
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+    <div class="theme-background"></div>
+    <div class="body">
+        <div class="nav-button font-standard">
+            <a class="btn btn-info" href="{{ url_for('recipe', recipe_id=recipe_id) }}" role="button">Back to Recipe</a>
+        </div>
+        <div class="editor-section font-standard font-size-standard">
+            <div class="font-size-large font-highlight editor-section-title">EDIT INSTRUCTIONS</div>
+            <div class="font-size-standard font-highlight editor-section-message">{{ banner_message }}</div>
+            <form method="POST" action="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id=instruction_id, banner_message='') }}" novalidate>
+                <div class="instructions-section font-standard">
+                    <table>
+                        {% for step in recipe_instructions: %}
+                            <tr class="instruction-row">
+                                {% if step['InstructionID'] == instruction_id | int %}
+                                    <!-- Target instruction to be edited -->
+                                    <td class="instruction-number black-border">{{ step['StepNumber'] }}</td>
+                                    <td class="instruction-text">{{ form.instruction(class="text-area-entry") }}</td>
+                                    <td class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</td>
+                                {% else %}
+                                    <!-- existing instruction, not editing -->
+                                    <td class="instruction-number black-border">{{ step['StepNumber'] }}</td>
+                                    <td class="instruction-text">{{ step['StepText'] }}</td>
+                                    {% if instruction_id == "-1" %}
+                                        <!-- only show the edit button on the default page, not currently editing -->
+                                        <td class="font-size-tiny"><a href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id=step['InstructionID'], banner_message='') }}">[Edit]</a></td>
+                                    {% endif %}
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        {% if instruction_id == '0' %}
+                            <!-- adding new instruction -->
+                            <td class="instruction-number black-border"></td>
+                            <td class="instruction-text">{{ form.instruction(class="text-area-entry") }}</td>
+                            <td class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</td>
+                            <td><a class="btn btn-danger" href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id='-1', banner_message='Add Step cancelled!') }}" role="button">Cancel</a></td>
+                        {% endif %}
+                    </table>
+                </div>
+                {% if instruction_id == '-1' %}
+                    <!-- only show the 'add a step' button if we aren't already adding a step -->
+                    <div class="nav-button font-standard">
+                        <a class="btn btn-success" href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id='0', banner_message='') }}" role="button">Add Step</a>
+                    </div>
+                {% endif %}
+                <div class="hidden-fields">
+                    {{ form.instruction_id(class="hidden-fields") }}
+                    {{ form.recipe_id(class="hidden-fields") }}
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

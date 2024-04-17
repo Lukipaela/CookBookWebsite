@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+    Edit Instructions
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+    <div class="theme-background"></div>
+    <div class="body">
+        <div class="nav-button font-standard">
+            <a class="btn btn-info" href="{{ url_for('recipe', recipe_id=recipe_id) }}" role="button">Back to Recipe</a>
+        </div>
+        <div class="editor-section font-standard font-size-standard">
+            <!-- banner and home button -->
+            <div class="font-size-large font-highlight editor-section-title">EDIT INGREDIENTS</div>
+            <div class="font-size-standard font-highlight editor-section-message">{{ banner_message }}</div>
+
+            <!-- form -->
+            <form method="POST" action="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id='-1') }}" novalidate>
+                <div class="edit-ingredients-section-left font-standard font-size-standard theme-border">
+                    <table>
+                        {% for ingredient in ingredients: %}
+                            <tr class="ingredient-row">
+                                <!-- if this ingredient is not being edited, show the normal format -->
+                                {% if ingredient_id | int != ingredient['IngredientID'] %}
+                                    <td class="ingredient-name">{{ ingredient['IngredientName'] }}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }} {% endif %}</td>
+                                    <!-- quantity and units -->
+                                    <td class="ingredient-quantity">{{ ingredient['Quantity'] }} {{ ingredient['Units'] }}</td>
+                                {% endif %}
+
+                                <!-- show edit buttons only if in default display mode -->
+                                {% if ingredient_id == '-1' %}
+                                    <!-- edit button -->
+                                    <td>
+                                        <div class="font-size-tiny centered">
+                                            <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=ingredient['IngredientID']) }}">[Edit]</a>
+                                        </div>
+                                    </td>
+                                {% endif %}
+
+                                <!-- if this ingredient is being edited, show the entry fields -->
+                                {% if ingredient_id | int == ingredient['IngredientID'] %}
+                                    <!-- name and prep -->
+                                    <td class="ingredient-name">{{ form.ingredient_name(class="combo-standard") }} {{ form.ingredient_prep(class="combo-standard") }}</td>
+                                    <!-- quantity and units -->
+                                    <td class="ingredient-quantity">{{ form.ingredient_quantity(class="text-entry-small") }} {{ form.ingredient_unit(class="combo-standard") }}</td>
+                                    <!-- submit / cancel buttons -->
+                                    <td class="">
+                                        <a class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</a>
+                                    </td>
+                                    <td class="">
+                                        <a class="btn btn-danger" href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id='-1', banner_message='Edit Ingredient cancelled!') }}" role="button">Cancel</a>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    {% if ingredient_id == '-1' %}
+                        <!-- only show the 'add' button if we are in default view -->
+                        <div class="nav-button font-standard">
+                            <a class="btn btn-success" href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id='0') }}" role="button">Add Ingredient</a>
+                        </div>
+                    {% endif %}
+                    <div class="hidden-fields">
+                        {{ form.ingredient_id(class="hidden-fields") }}
+                        {{ form.recipe_id(class="hidden-fields") }}
+                        {% if ingredient_id != '0' %}
+                            <!-- form fields to render here as hidden only if we are editing an existing row -->
+                            {{ form.ingredient_name_new(class="hidden-fields") }}
+                            {{ form.ingredient_prep_new(class="hidden-fields") }}
+                            {{ form.ingredient_unit_new(class="hidden-fields") }}
+                            {{ form.search_name(class="hidden-fields") }}
+                            {{ form.search_name_new(class="hidden-fields") }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="edit-ingredients-section-right">
+                    <!-- Add Ingredient section -->
+                    {% if ingredient_id == '0' %}
+                        <table>
+
+                            <!-- INGREDIENT NAME -->
+                            <tr>
+                                <!-- Name Combo -->
+                                <td class="new-ingredient-column-left">
+                                    {{ form.ingredient_name.label }}
+                                </td>
+                                <!-- combo and NEW button -->
+                                <td class="new-ingredient-column-mid JS-ingredient-combo">
+                                    {{ form.ingredient_name(class="combo-wide ingredient-entry-field") }}
+                                </td>
+                                <td class="new-ingredient-column-right JS-ingredient-combo">
+                                    <div class="nav-button font-standard">
+                                        <a class="btn btn-success" role="button" onclick="newIngredientClicked()">New</a>
+                                    </div>
+                                </td>
+                                <!-- new ingredient name record fields -->
+                                <td class="new-ingredient-column-mid JS-ingredient-text" style="display: none;">
+                                    {{ form.ingredient_name_new(class="combo-wide ingredient-entry-field") }}
+                                </td>
+                            </tr>
+                            <!-- vegetarian checkbox -->
+                            <tr>
+                                <td class="new-ingredient-column-left JS-ingredient-text" style="display:none;">
+                                    {{ form.is_vegetarian.label }}
+                                </td>
+                                <td class="new-ingredient-column-mid JS-ingredient-text" style="display:none;">
+                                    {{ form.is_vegetarian(class="checkbox-entry ingredient-entry-field") }}
+                                </td>
+                                <td class="new-ingredient-column-right JS-ingredient-text" style="display:none;">
+                                </td>
+                            </tr>
+                            <!-- search name -->
+                            <tr class="JS-search-name-row" style="display: none;">
+                                <td class="new-ingredient-column-left">
+                                    {{ form.search_name.label }}
+                                </td>
+                                <!-- combo and NEW button -->
+                                <td class="new-ingredient-column-mid JS-search-name-combo">
+                                    {{ form.search_name(class="combo-wide ingredient-entry-field") }}
+                                </td>
+                                <td class="new-ingredient-column-right JS-search-name-combo">
+                                    <div class="nav-button font-standard">
+                                        <a class="btn btn-success" role="button" onclick="newSearchNameClicked()">New</a>
+                                    </div>
+                                </td>
+                                <!-- new ingredient name record fields -->
+                                <td class="new-ingredient-column-mid JS-search-name-text" style="display: none;">
+                                    {{ form.search_name_new(class="combo-wide ingredient-entry-field") }}
+                                </td>
+                            </tr>
+
+
+                            <!-- INGREDIENT PREP -->
+                            <tr>
+                                <td class="new-ingredient-column-left">
+                                    {{ form.ingredient_prep.label }}
+                                </td>
+                                <!-- combo and NEW button -->
+                                <td class="new-ingredient-column-mid JS-prep-combo">
+                                    {{ form.ingredient_prep(class="combo-wide ingredient-entry-field") }}
+                                </td>
+                                <td class="new-ingredient-column-right JS-prep-combo">
+                                    <div class="nav-button font-standard">
+                                        <a class="btn btn-success" role="button" onclick="newPrepClicked()">New</a>
+                                    </div>
+                                </td>
+                                <td class="new-ingredient-column-mid JS-prep-text" style="display:none;">
+                                    {{ form.ingredient_prep_new(class="combo-wide ingredient-entry-field") }}
+                                </td>
+                            </tr>
+
+
+                            <!-- INGREDIENT QUANTITY -->
+                            <tr>
+                                <td class="new-ingredient-column-left">
+                                    {{ form.ingredient_quantity.label }}
+                                </td>
+                                <td class="new-ingredient-column-mid">
+                                    {{ form.ingredient_quantity(class="combo-standard ingredient-entry-field") }}
+                                </td>
+                                <td class="new-ingredient-column-right">
+                                </td>
+                            </tr>
+
+
+                            <!-- INGREDIENT UNIT -->
+                            <tr>
+                                <!-- combo and NEW button -->
+                                <td class="new-ingredient-column-left">
+                                    {{ form.ingredient_unit.label }}
+                                </td>
+                                <td class="new-ingredient-column-mid JS-unit-combo">
+                                    {{ form.ingredient_unit(class="combo-wide ingredient-entry-field") }}
+                                </td>
+                                <td class="new-ingredient-column-right JS-unit-combo">
+                                    <div class="nav-button font-standard">
+                                        <a class="btn btn-success" role="button" onclick="newUnitClicked()">New</a>
+                                    </div>
+                                </td>
+                                <td class="new-ingredient-column-mid JS-unit-text" style="display:none;">
+                                    {{ form.ingredient_unit_new(class="combo-wide ingredient-entry-field") }}
+                                </td>
+                            </tr>
+                        </table>
+
+
+                        <!-- submit / cancel buttons -->
+                        <div class="ingredient-entry-field">
+                            <a class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</a>
+                            <a class="btn btn-danger" href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id='-1', banner_message='Edit Ingredient cancelled!') }}" role="button">Cancel</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+        function newIngredientClicked(){
+            // this function is called when the "New Ingredient" button is pressed,
+            // allowing the user to enter a new ingredient name, not already in the combo list.
+            var ingredientComboFields = document.getElementsByClassName("JS-ingredient-combo");
+
+            // Hide combo field and button, show text fields
+            var iterations = ingredientComboFields.length;
+            for (var i = 0; i < iterations; i++) {
+                ingredientComboFields[i].style.display = "none";
+            }
+
+            // show the vegetarian checkbox
+            var ingredientTextFields = document.getElementsByClassName("JS-ingredient-text");
+            var iterations2 = ingredientTextFields.length;
+            for (var i = 0; i < iterations2; i++) {
+                ingredientTextFields[i].style.display = "";
+            }
+
+            //show fields for Search Name
+            var searchNameRow = document.getElementsByClassName("JS-search-name-row")[0];
+            searchNameRow.style.display = "";
+        }
+
+        function newSearchNameClicked(){
+            var searchNameComboFields = document.getElementsByClassName("JS-search-name-combo");
+            var searchNameTextField = document.getElementsByClassName("JS-search-name-text")[0];
+            // Hide combo field and button, show text field
+            searchNameComboFields[0].style.display = "none";
+            searchNameComboFields[1].style.display = "none";
+            searchNameTextField.style.display = "inline";
+        }
+
+        function newPrepClicked(){
+            var prepComboFields = document.getElementsByClassName("JS-prep-combo");
+            var prepTextField = document.getElementsByClassName("JS-prep-text")[0];
+            // Hide combo field and button, show text field
+            prepComboFields[0].style.display = "none";
+            prepComboFields[1].style.display = "none";
+            prepTextField.style.display = "inline";
+        }
+
+        function newUnitClicked(){
+            var unitComboFields = document.getElementsByClassName("JS-unit-combo");
+            var unitTextField = document.getElementsByClassName("JS-unit-text")[0];
+            // Hide combo field and button, show text field
+            unitComboFields[0].style.display = "none";
+            unitComboFields[1].style.display = "none";
+            unitTextField.style.display = "inline";
+        }
+
+    </script>
+{% endblock %}
