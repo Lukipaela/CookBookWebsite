@@ -12,9 +12,10 @@
 {% block content %}
     <div class="theme-background"></div>
     <div class="body">
-        <div class="nav-button font-standard">
-            <a class="btn btn-info" href="{{ url_for('recipe', recipe_id=recipe_id) }}" role="button">Back to Recipe</a>
-        </div>
+
+        <!-- Nav Bar -->
+        {% include "nav_buttons.html" %}
+
         <div class="editor-section font-standard font-size-standard">
             <!-- banner and home button -->
             <div class="font-size-large font-highlight editor-section-title">EDIT INGREDIENTS</div>
@@ -100,23 +101,23 @@
                                     </div>
                                 </td>
                                 <!-- new ingredient name record fields -->
-                                <td class="new-ingredient-column-mid JS-ingredient-text" style="display: none;">
+                                <td class="new-ingredient-column-mid JS-ingredient-text JS-default-hidden">
                                     {{ form.ingredient_name_new(class="combo-wide ingredient-entry-field") }}
                                 </td>
                             </tr>
                             <!-- vegetarian checkbox -->
                             <tr>
-                                <td class="new-ingredient-column-left JS-ingredient-text" style="display:none;">
+                                <td class="new-ingredient-column-left JS-ingredient-text JS-default-hidden">
                                     {{ form.is_vegetarian.label }}
                                 </td>
-                                <td class="new-ingredient-column-mid JS-ingredient-text" style="display:none;">
+                                <td class="new-ingredient-column-mid JS-ingredient-text JS-default-hidden">
                                     {{ form.is_vegetarian(class="checkbox-entry ingredient-entry-field") }}
                                 </td>
-                                <td class="new-ingredient-column-right JS-ingredient-text" style="display:none;">
+                                <td class="new-ingredient-column-right JS-ingredient-text JS-default-hidden">
                                 </td>
                             </tr>
                             <!-- search name -->
-                            <tr class="JS-search-name-row" style="display: none;">
+                            <tr class="JS-search-name-row JS-default-hidden">
                                 <td class="new-ingredient-column-left">
                                     {{ form.search_name.label }}
                                 </td>
@@ -130,7 +131,7 @@
                                     </div>
                                 </td>
                                 <!-- new ingredient name record fields -->
-                                <td class="new-ingredient-column-mid JS-search-name-text" style="display: none;">
+                                <td class="new-ingredient-column-mid JS-search-name-text JS-default-hidden">
                                     {{ form.search_name_new(class="combo-wide ingredient-entry-field") }}
                                 </td>
                             </tr>
@@ -150,7 +151,7 @@
                                         <a class="btn btn-success" role="button" onclick="newPrepClicked()">New</a>
                                     </div>
                                 </td>
-                                <td class="new-ingredient-column-mid JS-prep-text" style="display:none;">
+                                <td class="new-ingredient-column-mid JS-prep-text JS-default-hidden">
                                     {{ form.ingredient_prep_new(class="combo-wide ingredient-entry-field") }}
                                 </td>
                             </tr>
@@ -183,7 +184,7 @@
                                         <a class="btn btn-success" role="button" onclick="newUnitClicked()">New</a>
                                     </div>
                                 </td>
-                                <td class="new-ingredient-column-mid JS-unit-text" style="display:none;">
+                                <td class="new-ingredient-column-mid JS-unit-text JS-default-hidden">
                                     {{ form.ingredient_unit_new(class="combo-wide ingredient-entry-field") }}
                                 </td>
                             </tr>

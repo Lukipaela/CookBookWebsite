@@ -1,4 +1,4 @@
-<div class="instructions-section font-standard font-size-standard">
+<div class="recipe-main-area instructions-section font-standard font-size-standard">
     <div class="page-section-title">- Instructions -</div>
     <table>
         {% for step in recipe_instructions: %}
@@ -9,6 +9,6 @@
         {% endfor %}
     </table>
     <div class="font-size-tiny centered">
-        <a href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id=-1, banner_message='') }}">[Edit]</a>
+        <a href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id=-1, banner_message='') }}" class="JS-edit-button JS-default-hidden">[Edit]</a>
     </div>
 </div>

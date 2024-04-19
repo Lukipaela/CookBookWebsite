@@ -27,7 +27,7 @@
         {% endfor %}
     </table>
     <div class="font-size-tiny centered">
-        <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}">[Edit]</a>
+        <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}" class="JS-edit-button JS-default-hidden">[Edit]</a>
     </div>
 </div>
 
@@ -38,7 +38,7 @@
         var currentServingsNode = document.getElementsByClassName("JS-recipe-servings")[0];
         var currentServings = Number(currentServingsNode.textContent);
         var newServings = currentServings + 1;
-        updateServings(currentServings, newServings);
+        updateIngredientQuantities(currentServings, newServings);
         currentServingsNode.textContent = newServings;
     }
 
@@ -48,11 +48,11 @@
         var newServings = currentServings;
         if (currentServings > 1)
             newServings = currentServings - 1;
-        updateServings(currentServings, newServings);
+        updateIngredientQuantities(currentServings, newServings);
         currentServingsNode.textContent = newServings;
     }
 
-    function updateServings(currentServings, newServings){
+    function updateIngredientQuantities(currentServings, newServings){
         var ingredientQuantities = document.getElementsByClassName("JS-ingredient-quantity");
         var iterations = ingredientQuantities.length;
         for (var i = 0; i < iterations; i++) {

@@ -12,13 +12,10 @@
 {% block content %}
     <div class="theme-background"></div>
     <div class="body">
-        <div class="nav-button font-standard">
-            {% if recipe_id == '-1' %}
-                <a class="btn btn-info" href="{{ url_for('recipe', recipe_id=recipe_id) }}" role="button">Back to Recipe</a>
-            {% else %}
-                <a class="btn btn-info" href="{{ url_for('home') }}" role="button">Home</a>
-            {% endif %}
-        </div>
+
+        <!-- Nav Bar -->
+        {% include "nav_buttons.html" %}
+
         <div class="editor-section font-standard">
             <div class="font-size-large font-highlight editor-section-title">EDIT RECIPE</div>
             <div class="font-size-standard font-highlight editor-section-message">{{ banner_message }}</div>

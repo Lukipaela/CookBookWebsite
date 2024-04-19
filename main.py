@@ -27,6 +27,7 @@ LOW_FAT_MEAL_THRESHOLD = 7  # meals with less than this much fat / serving will 
 LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
+prod_mode = True   # master toggle to switch between DEV and PROD modes
 
 
 # -------------------- DB METHODS -------------------- #
@@ -597,6 +598,19 @@ def process_database_form(form):
     return result
 
 
+# -------------------- UTILITY -------------------- #
+def create_nav_controls(home_button: bool, recipe_button: bool, recipe_id: str, edit_button: bool):
+    # currently simple converts the inputs into a JSON / Dict which can be read by the nav html
+    if prod_mode:
+        edit_button = False  # edit button never allowed in prod mode
+    return {
+        "home": home_button
+        , "edit": edit_button
+        , "recipe": recipe_button
+        , "recipeID": recipe_id
+    }
+
+
 # -------------------- APP ROUTES -------------------- #
 @app.route('/', methods=["GET", "POST"])
 def home():
@@ -633,6 +647,7 @@ def recipe(recipe_id: str, multiplier: int = 1):
     recipe_instructions = get_instructions(recipe_id)
     recipe_header = get_recipe_header(recipe_id)
     badges = get_badges(recipe_id)
+    nav_controls = create_nav_controls(home_button=True, edit_button=True, recipe_button=False, recipe_id=recipe_id)
     return render_template("recipe.html"
                            , recipe_id=recipe_id
                            , ingredients=ingredients
@@ -640,7 +655,8 @@ def recipe(recipe_id: str, multiplier: int = 1):
                            , recipe_instructions=recipe_instructions
                            , recipe_header=recipe_header
                            , badges=badges
-                           , multiplier=multiplier)
+                           , multiplier=multiplier
+                           , nav_controls=nav_controls)
 
 
 @app.route('/edit_header/<string:recipe_id>', methods=["GET", "POST"])
@@ -668,11 +684,13 @@ def edit_header(recipe_id: str = NEW_RECORD_PAGE_INDEX):
             recipe_header = recipe_header_list[0]
         # recipe edit form
         form = configure_header_form(recipe_id, recipe_header)
+        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id)
         return render_template("edit_header.html"
                                , recipe_id=recipe_id
                                , recipe_header=recipe_header
                                , form=form
-                               , banner_message=banner_message)
+                               , banner_message=banner_message
+                               , nav_controls=nav_controls)
 
 
 @app.route('/edit_instructions/<string:recipe_id>', methods=["GET", "POST"])
@@ -703,12 +721,14 @@ def edit_instructions(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         recipe_instructions = get_instructions(recipe_id)
         # recipe edit form
         form = configure_instruction_form(recipe_id, instruction_id, recipe_instructions)
+        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id)
         return render_template("edit_instructions.html"
                                , recipe_id=recipe_id
                                , instruction_id=instruction_id
                                , recipe_instructions=recipe_instructions
                                , form=form
-                               , banner_message=banner_message)
+                               , banner_message=banner_message
+                               , nav_controls=nav_controls)
 
 
 @app.route('/edit_nutrition/<string:recipe_id>', methods=["GET", "POST"])
@@ -737,12 +757,14 @@ def edit_nutrition(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         nutrition_facts = get_nutrition(recipe_id)
         # recipe edit form
         form = configure_nutrition_form(recipe_id, nutrition_id, nutrition_facts)
+        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id)
         return render_template("edit_nutrition.html"
                                , recipe_id=recipe_id
                                , nutrition_id=nutrition_id
                                , nutrition_facts=nutrition_facts
                                , form=form
-                               , banner_message=banner_message)
+                               , banner_message=banner_message
+                               , nav_controls=nav_controls)
 
 
 @app.route('/edit_ingredient/<string:recipe_id>', methods=["GET", "POST"])
@@ -771,12 +793,14 @@ def edit_ingredients(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         ingredients = get_ingredients(recipe_id)
         # recipe edit form
         form = configure_ingredient_form(recipe_id, ingredient_id)
+        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id)
         return render_template("edit_ingredients.html"
                                , recipe_id=recipe_id
                                , ingredient_id=ingredient_id
                                , ingredients=ingredients
                                , form=form
-                               , banner_message=banner_message)
+                               , banner_message=banner_message
+                               , nav_controls=nav_controls)
 
 
 @app.route('/database', methods=["GET", "POST"])
@@ -786,10 +810,11 @@ def database():
     if request.method == 'POST':
         results = process_database_form(request.form)
     form["response"].data = results
-    return render_template("database.html", results=results, form=form)
+    nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=False, recipe_id=None)
+    return render_template("database.html", results=results, form=form, nav_controls=nav_controls)
 
 
 # -------------------- RUN -------------------- #
 if __name__ == '__main__':
-    app.run(debug=True)    # set to False for web deployment, True for local dev
+    app.run(debug=not prod_mode)    # set to False for web deployment, True for local dev
 
