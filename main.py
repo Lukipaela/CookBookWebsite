@@ -28,6 +28,7 @@ LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 prod_mode = True   # master toggle to switch between DEV and PROD modes
+# TODO set to true for prod
 
 
 # -------------------- DB METHODS -------------------- #
