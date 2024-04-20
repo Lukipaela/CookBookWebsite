@@ -1,0 +1,83 @@
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+Email Recipe Submission
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+    <div class="theme-background"></div>
+
+    <div class="body">
+        <!-- Nav Bar -->
+        {% include "nav_buttons.html" %}
+
+        <!-- intro -->
+
+        <!-- form -->
+        <form method="POST" action="{{ url_for('email_recipe') }}" novalidate>
+            <ul class="email-submission-list">
+                <li class="email-submission-row">
+                    <div class="email-recipe-explanation font-standard font-size-large">
+                        THIS PAGE NOT YET FUNCTIONAL, IT IS ON THE SITE FOR TESTING PURPOSES ONLY!!!
+                    </div>
+                </li>
+                <li class="email-submission-row">
+                    <div class="email-recipe-explanation font-standard font-size-standard">
+                        This recipe will be emailed to Dan, and he will add it to the database in a few days,
+                        then it will become a permanent part of this site!
+                        <br>
+                        <br>
+                        Got a recipe you found online? Feel free to just post the URL for it in the Source field,
+                        add any personal notes / recommended tweaks in the Instructions field and Dan can take care of the rest.
+                    </div>
+                </li>
+                <li class="email-submission-row">
+                    <!-- name -->
+                    <div class="email-submission-field">{{ form.recipe_name.label(class="email-submission-field-label font-standard font-size-standard") }}</div>
+                    <div class="email-submission-field">{{ form.recipe_name(class="text-entry-long font-standard font-size-standard") }}</div>
+                </li>
+                <li class="email-submission-row">
+                    <!-- source -->
+                    <div class="email-submission-field">{{ form.recipe_source.label(class="email-submission-field-label font-standard font-size-standard") }}</div>
+                    <div class="email-submission-field">{{ form.recipe_source(class="text-entry-long font-standard font-size-standard") }}</div>
+                </li>
+                <li class="email-submission-row">
+                    <!-- cook time -->
+                    <div class="email-submission-field">{{ form.total_time.label(class="email-submission-field-label font-standard font-size-standard") }}</div>
+                    <div class="email-submission-field">{{ form.total_time(class="text-entry-small font-standard font-size-standard") }}</div>
+                    <!-- servings -->
+                    <div class="email-submission-field">{{ form.servings.label(class="email-submission-field-label font-standard font-size-standard") }}</div>
+                    <div class="email-submission-field">{{ form.servings(class="text-entry-small font-standard font-size-standard") }}</div>
+                </li>
+                <li class="email-submission-row">
+                    <!-- instructions -->
+                    <div class="email-submission-field">{{ form.instructions.label(class="email-submission-field-label font-standard font-size-standard") }}</div>
+                    <div class="email-submission-field">{{ form.instructions(class="text-area-entry-large font-standard font-size-standard") }}</div>
+                </li>
+                <li class="email-submission-row">
+                    <!-- ingredients -->
+                    <div class="email-submission-field">{{ form.ingredients.label(class="email-submission-field-label font-standard font-size-standard") }}</div>
+                    <div class="email-submission-field">{{ form.ingredients(class="text-area-entry-large font-standard font-size-standard") }}</div>
+                </li>
+                <li class="email-submission-row">
+                    <!-- nutrition -->
+                    <div class="email-submission-field">{{ form.nutrition.label(class="email-submission-field-label font-standard font-size-standard") }}</div>
+                    <div class="email-submission-field">{{ form.nutrition(class="text-area-entry-large font-standard font-size-standard") }}</div>
+                </li>
+                <li class="email-submission-row">
+                    <div class="nav-button">
+                        {{ form.submit(class="btn btn-warning submit-button font-standard") }}
+                    </div>
+                </li>
+            </ul>
+        </form>
+
+        <!-- Footer-->
+        {% include "footer.html" %}
+    </div>
+{% endblock %}

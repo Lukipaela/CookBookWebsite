@@ -103,3 +103,15 @@ class DatabaseForm(FlaskForm):
     submit = SubmitField(label="Execute")
 
 
+class EmailRecipeForm(FlaskForm):
+    recipe_name = StringField(label="Recipe Name:")
+    recipe_source = StringField(label="Recipe Source:")
+    total_time = IntegerField(label="Total Time:")
+    servings = IntegerField(label="Servings:")
+    instructions = TextAreaField(label="Instructions:")
+    ingredients = TextAreaField(label="Ingredients:")
+    nutrition = TextAreaField(label="Nutrition:")
+    # submit
+    submit = SubmitField(label="Send to Dan!")
+
+

@@ -1,14 +1,17 @@
 {% if search_results | length > 0 %}
     <div class="widget recent-recipes-section theme-border">
-        <div class="widget-title font-highlight font-size-large"> - SEARCH RESULTS - </div>
+        <div class="widget-wrapper">
+            <div>
+                <div class="widget-title font-highlight font-size-large"> - SEARCH RESULTS - </div>
 
-        <div class="recent-recipes-list font-standard font-size-standard">
-            {% for recipe in search_results: %}
-                <div class="recent-recipe">
-                    <a href="{{ url_for('recipe', recipe_id=recipe['RecipeID']) }}">○ {{ recipe['RecipeName'] }}</a>
+                <div class="recent-recipes-list font-standard font-size-standard">
+                    {% for recipe in search_results: %}
+                        <div class="recent-recipe">
+                            <a href="{{ url_for('recipe', recipe_id=recipe['RecipeID']) }}">○ {{ recipe['RecipeName'] }}</a>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            </div>
         </div>
-
     </div>
 {% endif %}

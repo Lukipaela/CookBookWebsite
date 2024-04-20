@@ -27,8 +27,8 @@ LOW_FAT_MEAL_THRESHOLD = 7  # meals with less than this much fat / serving will 
 LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
-prod_mode = True   # master toggle to switch between DEV and PROD modes
 # TODO set to true for prod
+prod_mode = True   # master toggle to switch between DEV and PROD modes
 
 
 # -------------------- DB METHODS -------------------- #
@@ -600,7 +600,8 @@ def process_database_form(form):
 
 
 # -------------------- UTILITY -------------------- #
-def create_nav_controls(home_button: bool, recipe_button: bool, recipe_id: str, edit_button: bool):
+def create_nav_controls(home_button: bool = False, recipe_button: bool = False, recipe_id: str = "0"
+                        , edit_button: bool = False):
     # currently simple converts the inputs into a JSON / Dict which can be read by the nav html
     if prod_mode:
         edit_button = False  # edit button never allowed in prod mode
@@ -633,12 +634,14 @@ def home():
                                , recent_recipes=recent_recipes
                                , search_form=search_form
                                , search_results=search_results
-                               , message=message)
+                               , message=message
+                               , prod_mode=prod_mode)
     else:
         return render_template("index.html"
                                , recent_recipes=recent_recipes
                                , search_form=search_form
-                               , search_results=search_results)
+                               , search_results=search_results
+                               , prod_mode=prod_mode)
 
 
 @app.route('/recipe/<string:recipe_id>', methods=["GET"])
@@ -813,6 +816,17 @@ def database():
     form["response"].data = results
     nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=False, recipe_id=None)
     return render_template("database.html", results=results, form=form, nav_controls=nav_controls)
+
+
+@app.route('/email_recipe', methods=["GET", "POST"])
+def email_recipe():
+    form = recipe_forms.EmailRecipeForm()
+    message = ""
+    if request.method == 'POST':
+        # TODO integrate email class
+        message = "DO STUFF HERE"
+    nav_controls = create_nav_controls(home_button=True)
+    return render_template("email_recipe.html", message=message, form=form, nav_controls=nav_controls)
 
 
 # -------------------- RUN -------------------- #

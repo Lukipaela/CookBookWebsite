@@ -6,7 +6,7 @@
   --theme-font-light: #004225;
   --theme-font-highlight: #FFB000;
   --theme-entry-field: #EEEEEE;
- */
+*/
 
   /* dark theme
   --theme-background: #0F0E0E;
@@ -24,13 +24,21 @@
   --theme-entry-field: #444444;
 */
 
-/* summer theme */
+/* summer theme*/
   --theme-background: #D9EDBF;
   --theme-borders: #FF9800;
   --theme-font-light: #2C7865;
   --theme-font-highlight: #90D26D;
   --theme-entry-field: #EEEEEE;
 
+
+/* summer theme2
+  --theme-background: #B0C5A4;
+  --theme-borders: #D37676;
+  --theme-font-light: #EBC49F;
+  --theme-font-highlight: #F1EF99;
+  --theme-entry-field: #EEEEEE;
+*/
 
 
 
@@ -104,6 +112,30 @@
     padding-bottom:3rem;
 }
 
+/* EMAIL RECIPE PAGE */
+.email-submission-row{
+    width: 100%;
+    list-style-type: none;
+    display : flex;
+    align-items : center;
+    justify-content: center;
+}
+.email-submission-field{
+    display: inline-block;
+    padding-bottom: 1.5rem;
+}
+.email-submission-field-label{
+    padding: 0 1rem 0 2rem;
+
+}
+.email-submission-list{
+    margin-top:5rem;
+}
+.email-recipe-explanation{
+    max-width: 60rem;
+    padding-bottom: 2rem;
+}
+
 /* FONTS */
 .font-standard{
     color: var(--theme-font-light);
@@ -163,9 +195,16 @@
 
 }
 .text-area-entry{
-    width: 100%;
-    min-width: 50rem;
+    width: 50rem;
     height: 10rem;
+    background-color: var(--theme-entry-field);
+    color: var(--theme-font-highlight);
+    font-weight: 500;
+    text-align: left;
+}
+.text-area-entry-large{
+    width: 80rem;
+    height: 30rem;
     background-color: var(--theme-entry-field);
     color: var(--theme-font-highlight);
     font-weight: 500;
@@ -245,11 +284,11 @@
 }
 .ingredient-name{
     text-align: left;
-    padding-right: 1rem;
+
 }
 .ingredient-quantity{
     text-align: right;
-    padding-left: 3rem;
+
 }
 .edit-ingredients-section-left{
     text-align: center;
@@ -306,6 +345,10 @@
     text-align: left;
 
 }
+.instructions-section table{
+    width: 100%
+
+}
 .instruction-number{
     display:inline-block;
     vertical-align: middle;
@@ -325,7 +368,7 @@
 }
 .instruction-text{
     padding-bottom: 0;
-
+    min-width: 85%
 }
 
 /* JAVASCRIPT TARGET CLASSES */
@@ -431,10 +474,21 @@
 }
 
 /* WIDGETS */
+
+@media (max-width: 700px){
+    .widget{
+        width: 90%;
+    }
+}
+@media (min-width: 700px){
+    .widget{
+        width: 60rem;
+        height: 45rem;
+    }
+}
 .widget{
     display: inline-block;
     margin: 1.5rem;
-    min-width: 35%;
     vertical-align: top;
 }
 .widget-title{
@@ -449,7 +503,13 @@
     padding-bottom: 1rem;
 
 }
-
+.widget-wrapper{
+    display : flex;
+    align-items : center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
 
 /* ==================== ELEMENTS ==================== */
 body{
