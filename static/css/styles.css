@@ -122,6 +122,7 @@
 }
 .email-submission-field{
     display: inline-block;
+
 }
 .email-submission-field-label{
     padding: 2rem 1rem 0 2rem;
@@ -129,6 +130,7 @@
 }
 .email-submission-list{
     margin-top:5rem;
+    padding-left: 0;
 
 }
 .email-recipe-explanation{
@@ -212,14 +214,14 @@
 @media (max-width: 1100px) and (min-width: 800px){
     /* small screens */
     .text-area-entry-large{
-        width: 40rem;
+        width: 50rem;
         height: 40rem;
     }
 }
 @media (max-width: 800px){
     /* very small screens */
     .text-area-entry-large{
-        width: 25rem;
+        width: 35rem;
         height: 30rem;
     }
 }
@@ -252,13 +254,13 @@
 @media (max-width: 1100px) and (min-width: 800px){
     /* small screens */
     .text-entry-long{
-        width: 40rem;
+        width: 50rem;
     }
 }
 @media (max-width: 800px){
     /*  very small screens */
     .text-entry-long{
-        width: 25rem;
+        width: 35rem;
     }
 }
 .text-entry-long{
