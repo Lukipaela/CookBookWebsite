@@ -13,12 +13,17 @@ from sqlite_handlers import execute_query, execute_insert_script, execute_update
     , execute_general_sql
 from recipe_forms import RecipeHeaderForm, RecipeInstructionForm, RecipeIngredientForm, RecipeNutritionForm\
     , RecipeSearchForm
+import emailer
 
 
 # -------------------- FLASK -------------------- #
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_KEY')
 Bootstrap(app)
+
+
+# ------------------------------ EMAILER ------------------------------ #
+email_sender = emailer.Emailer()
 
 
 # -------------------- CONSTANTS -------------------- #
@@ -599,6 +604,26 @@ def process_database_form(form):
     return result
 
 
+def process_email_form(form):
+    message = ""
+    if form["recipe_name"] is not None:
+        message += "Recipe Name: " + form["recipe_name"].data + "\n"
+    if form["recipe_source"] is not None:
+        message += "Recipe Source: " + str(form["recipe_source"].data) + "\n"
+    if form["total_time"] is not None:
+        message += "Time: " + str(form["total_time"].data) + "\n"
+    if form["servings"] is not None:
+        message += "Servings: " + str(form["servings"].data) + "\n"
+    if form["instructions"] is not None:
+        message += "Instructions: " + str(form["instructions"].data) + "\n"
+    if form["ingredients"] is not None:
+        message += "Ingredients: " + str(form["ingredients"].data) + "\n"
+    if form["nutrition"] is not None:
+        message += "Nutrition: " + str(form["nutrition"].data) + "\n"
+    email_sender.send_message(subject="New recipe submitted!."
+                              , message=message)
+
+
 # -------------------- UTILITY -------------------- #
 def create_nav_controls(home_button: bool = False, recipe_button: bool = False, recipe_id: str = "0"
                         , edit_button: bool = False):
@@ -823,8 +848,8 @@ def email_recipe():
     form = recipe_forms.EmailRecipeForm()
     message = ""
     if request.method == 'POST':
-        # TODO integrate email class
-        message = "DO STUFF HERE"
+        process_email_form(form)
+        message = "Email sent. \n Thank you for the contribution!"
     nav_controls = create_nav_controls(home_button=True)
     return render_template("email_recipe.html", message=message, form=form, nav_controls=nav_controls)
 

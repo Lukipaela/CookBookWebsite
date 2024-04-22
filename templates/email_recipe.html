@@ -16,16 +16,9 @@ Email Recipe Submission
         <!-- Nav Bar -->
         {% include "nav_buttons.html" %}
 
-        <!-- intro -->
-
         <!-- form -->
         <form method="POST" action="{{ url_for('email_recipe') }}" novalidate>
             <ul class="email-submission-list">
-                <li class="email-submission-row">
-                    <div class="email-recipe-explanation font-standard font-size-large">
-                        THIS PAGE NOT YET FUNCTIONAL, IT IS ON THE SITE FOR TESTING PURPOSES ONLY!!!
-                    </div>
-                </li>
 
                 <!-- INSTRUCTIONS -->
                 <li class="email-submission-row">
@@ -37,6 +30,10 @@ Email Recipe Submission
                         Got a recipe you found online? Feel free to just post the URL for it in the Source field,
                         add any personal notes / recommended tweaks in the Instructions field and Dan can take care of the rest.
                     </div>
+                </li>
+
+                <li class="email-submission-row">
+                    <div class="font-size-standard font-highlight editor-section-message">{{ message }}</div>
                 </li>
 
                 <!-- name -->
