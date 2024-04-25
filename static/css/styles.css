@@ -316,8 +316,18 @@
     width: 100%;
     text-align: center;
 }
-.ingredient-row td{
-    padding-bottom: 1rem;
+.ingredient-row{
+    list-style-type: none;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.ingredient-row-left{
+}
+.ingredient-row-right{
+}
+.ingredient-row-item{
 
 }
 .ingredient-name{
@@ -332,6 +342,8 @@
     text-align: center;
     display: inline-block;
     max-width: 60%;
+    min-width: 40%;
+    min-height: 15rem;
     vertical-align: middle;
 }
 .edit-ingredients-section-right{
@@ -555,6 +567,9 @@ body{
 
 }
 
+ul{
+    padding: 0;
+}
 
 /* ==================== IDs ==================== */
 
