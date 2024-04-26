@@ -1,12 +1,12 @@
 /* ==================== THEME CONSTANTS ==================== */
 :root {
-/* light theme
+/* light theme*/
   --theme-background: #F5F5DC;
   --theme-borders: #FFCF9D;
   --theme-font-light: #004225;
   --theme-font-highlight: #FFB000;
   --theme-entry-field: #EEEEEE;
-*/
+
 
   /* dark theme
   --theme-background: #0F0E0E;
@@ -24,13 +24,13 @@
   --theme-entry-field: #444444;
 */
 
-/* summer theme*/
+/* summer theme
   --theme-background: #D9EDBF;
   --theme-borders: #FF9800;
   --theme-font-light: #2C7865;
   --theme-font-highlight: #90D26D;
   --theme-entry-field: #EEEEEE;
-
+*/
 
 /* summer theme2
   --theme-background: #B0C5A4;
