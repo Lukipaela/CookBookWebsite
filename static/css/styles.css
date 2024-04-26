@@ -190,7 +190,6 @@
 }
 .nav-button{
     padding: 1rem;
-
 }
 .submit-button{
     color: black;
@@ -308,13 +307,20 @@
         top: 25%;
     }
 }
+@media (max-width: 1100px){
+    .ingredients-section{
+        /* small mode, use full screen width per section */
+        width: 90%;
+    }
+}
 .ingredients-section{
     text-align: center;
     display: inline-block;
 }
-.ingredients-section table {
+.ingredients-section ul {
     width: 100%;
     text-align: center;
+    margin-top: 2rem;
 }
 .ingredient-row{
     list-style-type: none;
@@ -322,13 +328,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-.ingredient-row-left{
-}
-.ingredient-row-right{
-}
-.ingredient-row-item{
-
+    padding-top: 1.2rem;
 }
 .ingredient-name{
     text-align: left;
@@ -341,7 +341,7 @@
 .edit-ingredients-section-left{
     text-align: center;
     display: inline-block;
-    max-width: 60%;
+    max-width: 90%;
     min-width: 40%;
     min-height: 15rem;
     vertical-align: middle;
@@ -356,6 +356,7 @@
     margin: 1rem;
 
 }
+
 .new-ingredient-column-left{
     text-align: right;
     width: 55rem;
@@ -371,6 +372,7 @@
     width: 55rem;
 
 }
+
 .serving-multiplier-button img{
     display:inline-block;
     height: 2rem;
@@ -387,8 +389,10 @@
     background-color: var(--theme-borders);
     border-radius: 2rem;
     padding: .4rem 1.2rem;
+    margin-bottom: 3rem;
     margin-bottom: 5rem;
 }
+
 
 /* INSTRUCTIONS */
 .instructions-section{
@@ -405,16 +409,20 @@
     text-align:center;
     font-size: 2rem;
     font-weight:700;
-    margin: 1rem;
+    margin-right: 1rem;
     background-color: var(--theme-borders);
     width: 3.1rem;
     height: 3.1rem;
     border-radius: 2rem;
+    flex-shrink: 0;
 }
-.instruction-row td{
-    padding-bottom: 1.5rem;
-    vertical-align:middle;
-
+.instruction-row{
+    list-style-type: none;
+    width: 100%;
+    display: flex;
+    align-content: flex-start;
+    align-items: top;
+    padding-bottom: 1.4rem;
 }
 .instruction-text{
     padding-bottom: 0;
@@ -430,10 +438,17 @@
 /* NAV BAR */
 .nav-buttons-section{
     position: absolute;
-    left: 3rem;
-    top: 2rem;
+    display: flex;
+    left: 1.5rem;
+    top: 1rem;
+    width: 100%;
 
 }
+.nav-bar-button{
+    padding: .2rem;
+
+}
+
 
 /* NUTRITION */
 .nutrition-facts-section{
@@ -542,7 +557,7 @@
     vertical-align: top;
 }
 .widget-title{
-    padding: 1rem 0 2rem;
+    padding-bottom:2rem;
 
 }
 .recent-recipes-section{
@@ -555,7 +570,7 @@
 }
 .widget-wrapper{
     display : flex;
-    align-items : center;
+    flex-direction: column;
     justify-content: center;
     height: 100%;
     width: 100%;

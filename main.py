@@ -33,7 +33,7 @@ LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod
-prod_mode = True   # master toggle to switch between DEV and PROD modes
+prod_mode = False   # master toggle to switch between DEV and PROD modes
 
 
 # -------------------- DB METHODS -------------------- #
@@ -88,6 +88,16 @@ def get_recent_recipes():
                    "FROM CBRecipe " \
                    "ORDER BY CreationGMT DESC " \
                    "LIMIT 10"
+    results = execute_query(query_string)
+    return results
+
+
+def get_site_stats():
+    query_string = "SELECT CBRecipeType.LongName 'Category', COUNT(*) 'Count'" \
+                   "FROM CBRecipeType " \
+                   "JOIN CBRecipe ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
+                   "GROUP BY CBRecipeType.LongName " \
+                   "ORDER BY 1 ASC"
     results = execute_query(query_string)
     return results
 
@@ -643,6 +653,7 @@ def create_nav_controls(home_button: bool = False, recipe_button: bool = False, 
 def home():
     print(f"{request.method} method request for home called")
     # get data for recent recipe widget
+    site_stats = get_site_stats()
     recent_recipes = get_recent_recipes()
     search_form = configure_search_form()
     search_results = []
@@ -657,6 +668,7 @@ def home():
             return redirect(url_for('recipe', recipe_id=search_results[index]["RecipeID"]))
         return render_template("index.html"
                                , recent_recipes=recent_recipes
+                               , site_stats=site_stats
                                , search_form=search_form
                                , search_results=search_results
                                , message=message
@@ -664,6 +676,7 @@ def home():
     else:
         return render_template("index.html"
                                , recent_recipes=recent_recipes
+                               , site_stats=site_stats
                                , search_form=search_form
                                , search_results=search_results
                                , prod_mode=prod_mode)

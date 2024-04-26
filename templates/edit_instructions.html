@@ -27,7 +27,7 @@
                                 {% if step['InstructionID'] == instruction_id | int %}
                                     <!-- Target instruction to be edited -->
                                     <td class="instruction-number black-border">{{ step['StepNumber'] }}</td>
-                                    <td class="instruction-text">{{ form.instruction(class="text-area-entry") }}</td>
+                                    <td class="instruction-text">{{ form.instruction(class="text-area-entry text-area-entry-large") }}</td>
                                     <td class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</td>
                                 {% else %}
                                     <!-- existing instruction, not editing -->
@@ -43,7 +43,7 @@
                         {% if instruction_id == '0' %}
                             <!-- adding new instruction -->
                             <td class="instruction-number black-border"></td>
-                            <td class="instruction-text">{{ form.instruction(class="text-area-entry") }}</td>
+                            <td class="instruction-text">{{ form.instruction(class="text-area-entry text-area-entry-large") }}</td>
                             <td class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</td>
                             <td><a class="btn btn-danger" href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id='-1', banner_message='Add Step cancelled!') }}" role="button">Cancel</a></td>
                         {% endif %}

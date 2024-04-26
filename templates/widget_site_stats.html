@@ -1,0 +1,12 @@
+<div class="widget site-stats-section theme-border">
+    <div class="widget-wrapper">
+        <div class="widget-title font-highlight font-size-large">SITE STATS</div>
+
+            {% for stat in site_stats: %}
+                <div class="site-stat font-standard font-size-standard">
+                    {{ stat['Category'] }}:
+                    {{ stat['Count'] }}
+                </div>
+            {% endfor %}
+    </div>
+</div>

@@ -1,13 +1,13 @@
 <div class="recipe-main-area instructions-section font-standard font-size-standard">
     <div class="page-section-title">- Instructions -</div>
-    <table>
+    <ul>
         {% for step in recipe_instructions: %}
-            <tr class="instruction-row">
-                <td class="instruction-number black-border">{{ step['StepNumber'] }}</td>
-                <td class="instruction-text">{{ step['StepText'] }}</td>
-            </tr>
+            <li class="instruction-row">
+                <div class="instruction-number black-border">{{ step['StepNumber'] }}</div>
+                <div class="instruction-text">{{ step['StepText'] }}</div>
+            </li>
         {% endfor %}
-    </table>
+    </ul>
     <div class="font-size-tiny centered">
         <a href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id=-1, banner_message='') }}" class="JS-edit-button JS-default-hidden">[Edit]</a>
     </div>

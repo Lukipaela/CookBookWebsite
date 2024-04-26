@@ -1,32 +1,30 @@
 <div class="widget recent-recipes-section theme-border">
     <div class="widget-wrapper">
-        <div>
-            <div class="widget-title font-highlight font-size-large"> - ADD NEW RECIPES - </div>
+        <div class="widget-title font-highlight font-size-large">ADD NEW RECIPES</div>
 
-            <div class="font-standard font-size-standard">
-                Got a recipe to contribute?
-                <br>
-                Share it with the class!
-                <br>
-                <br>
-                Unfortunately, since Dan is a cheapo who won't pay to subscribe to a premium database
-                that you can edit online, you will have to submit your recipes via an email form,
-                and he will add them to the site on a regular basis.
-                <br>
-                <br>
-            </div>
-
-            {% if prod_mode == False %}
-                <!-- dev mode, real add recipe page -->
-                <div class="nav-button font-standard">
-                    <a class="btn btn-success" href="{{ url_for('edit_header', recipe_id='0') }}" role="button">Add Recipe</a>
-                </div>
-            {% else %}
-                <!-- prod mode, email entry form page -->
-                <div class="nav-button font-standard">
-                    <a class="btn btn-success" href="{{ url_for('email_recipe') }}" role="button">Submit a recipe!</a>
-                </div>
-            {% endif %}
+        <div class="font-standard font-size-standard">
+            Got a recipe to contribute?
+            <br>
+            Share it with the class!
+            <br>
+            <br>
+            Unfortunately, since Dan is a cheapo who won't pay to subscribe to a premium database
+            that you can edit online, you will have to submit your recipes via an email form,
+            and he will add them to the site on a regular basis.
+            <br>
+            <br>
         </div>
+
+        {% if prod_mode == False %}
+            <!-- dev mode, real add recipe page -->
+            <div class="nav-button font-standard">
+                <a class="btn btn-success" href="{{ url_for('edit_header', recipe_id='0') }}" role="button">Add Recipe</a>
+            </div>
+        {% else %}
+            <!-- prod mode, email entry form page -->
+            <div class="nav-button font-standard">
+                <a class="btn btn-success" href="{{ url_for('email_recipe') }}" role="button">Submit a recipe!</a>
+            </div>
+        {% endif %}
     </div>
 </div>

@@ -1,16 +1,16 @@
 <div class="nav-buttons-section">
     {% if nav_controls['home'] == True %}
-        <div class="nav-button font-standard">
+        <div class="nav-bar-button font-standard">
             <a class="btn btn-success" href="{{ url_for('home') }}" role="button">Home</a>
         </div>
     {% endif %}
     {% if nav_controls['recipe'] == True and nav_controls['recipeID'] | int != 0 %}
-        <div class="nav-button font-standard">
+        <div class="nav-bar-button font-standard">
             <a class="btn btn-info" href="{{ url_for('recipe', recipe_id=nav_controls['recipeID']) }}" role="button">Back to Recipe</a>
         </div>
     {% endif %}
     {% if nav_controls['edit'] == True %}
-        <div class="nav-button font-standard">
+        <div class="nav-bar-button font-standard">
             <div class="btn btn-warning"role="button" onclick="editButtonClicked()">Edit</div>
         </div>
     {% endif %}

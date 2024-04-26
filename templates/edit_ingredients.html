@@ -31,20 +31,22 @@
                             <li class="ingredient-row">
                                 <!-- if this ingredient is not being edited, show the normal format -->
                                 {% if ingredient_id | int != ingredient['IngredientID'] %}
-                                    <div class="ingredient-row-left ingredient-row-item">
-                                        <div class="ingredient-name ingredient-row-item">{{ ingredient['IngredientName'] }}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }} {% endif %}</div>
+                                    <div class="ingredient-name">
+                                        {{ ingredient['IngredientName'] }}
+                                        {% if ingredient['Prep'] | length > 0 %}
+                                            , {{ ingredient['Prep'] }}
+                                        {% endif %}
                                     </div>
+
                                     <!-- quantity and units -->
-                                    <div class="ingredient-row-right ingredient-row-item">
-                                        <div class="ingredient-quantity ingredient-row-item">
-                                            {{ ingredient['Quantity'] }}
-                                            {{ ingredient['Units'] }}
-                                            <!-- show edit buttons only if in default display mode -->
-                                            {% if ingredient_id == '-1' %}
-                                                <!-- edit button -->
-                                                <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=ingredient['IngredientID']) }}" class="font-size-tiny centered">[Edit]</a>
-                                            {% endif %}
-                                        </div>
+                                    <div class="ingredient-quantity">
+                                        {{ ingredient['Quantity'] }}
+                                        {{ ingredient['Units'] }}
+                                        <!-- show edit buttons only if in default display mode -->
+                                        {% if ingredient_id == '-1' %}
+                                            <!-- edit button -->
+                                            <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=ingredient['IngredientID']) }}" class="font-size-tiny centered">[Edit]</a>
+                                        {% endif %}
                                     </div>
                                 {% endif %}
 
@@ -53,14 +55,18 @@
                                 <!-- if this ingredient is being edited, show the entry fields -->
                                 {% if ingredient_id | int == ingredient['IngredientID'] %}
                                     <!-- name and prep -->
-                                    <div class="ingredient-name ingredient-row-item">{{ form.ingredient_name(class="combo-standard") }} {{ form.ingredient_prep(class="combo-standard") }}</div>
-                                    <!-- quantity and units -->
-                                    <div class="ingredient-quantity ingredient-row-item">{{ form.ingredient_quantity(class="text-entry-small") }} {{ form.ingredient_unit(class="combo-standard") }}</div>
-                                    <!-- submit / cancel buttons -->
-                                    <div class="ingredient-row-item">
-                                        <a class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</a>
+                                    <div class="ingredient-name">
+                                        {{ form.ingredient_name(class="combo-standard") }}
+                                        {{ form.ingredient_prep(class="combo-standard") }}
                                     </div>
-                                    <div class="ingredient-row-item">
+                                    <!-- quantity and units -->
+                                    <div class="ingredient-quantity">
+                                        {{ form.ingredient_quantity(class="text-entry-small") }}
+                                        {{ form.ingredient_unit(class="combo-standard") }}
+                                    </div>
+                                    <!-- submit / cancel buttons -->
+                                    <div>
+                                        <a class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</a>
                                         <a class="btn btn-danger " href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id='-1', banner_message='Edit Ingredient cancelled!') }}" role="button">Cancel</a>
                                     </div>
                                 {% endif %}
