@@ -28,12 +28,12 @@ email_sender = emailer.Emailer()
 
 # -------------------- CONSTANTS -------------------- #
 QUICK_MEAL_THRESHOLD = 25  # meals taking less than this much time to cook will be marked as fast
-LOW_FAT_MEAL_THRESHOLD = 7  # meals with less than this much fat / serving will be marked as low fat
+LOW_FAT_MEAL_THRESHOLD = 5  # meals with less than this much saturated fat / serving will be marked as low fat
 LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod
-prod_mode = True   # master toggle to switch between DEV and PROD modes
+prod_mode = False   # master toggle to switch between DEV and PROD modes
 
 
 # -------------------- DB METHODS -------------------- #
@@ -149,7 +149,7 @@ def update_nutrition(recipe_id: str, nutrition_id: str, new_nutrition_name_code:
     execute_update_script(update_script)
 
     # process changes to badges
-    if new_nutrition_name_code == '2':  # fat
+    if new_nutrition_name_code == '9':  # saturated fat
         if float(new_nutrition_value) <= float(LOW_FAT_MEAL_THRESHOLD):
             # add low-fat badge, if not already present
             badge_name = "Low Fat"
@@ -169,7 +169,7 @@ def update_nutrition(recipe_id: str, nutrition_id: str, new_nutrition_name_code:
             execute_delete_script(delete_script)
     elif new_nutrition_name_code == '1':  # calories
         if float(new_nutrition_value) <= float(LOW_CAL_THRESHOLD):
-            # add low-fat badge, if not already present
+            # add low-cal badge, if not already present
             badge_name = "Low Calorie"
             insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
                             f'SELECT {recipe_id}, BadgeID ' \
@@ -246,7 +246,7 @@ def create_nutrition(recipe_id: str, new_nutrition_name_code: str, new_nutrition
                     f', {new_nutrition_unit_code} '
     new_id = execute_insert_script(insert_script, table_name='CBNutrition', id_column='NutritionID')
     # check if this new element deserves a badge
-    if new_nutrition_name_code == '2':  # fat
+    if new_nutrition_name_code == '9':  # sat fat
         if float(new_nutrition_value) <= float(LOW_FAT_MEAL_THRESHOLD):
             # add low-fat badge, if not already present
             badge_name = "Low Fat"
@@ -262,7 +262,7 @@ def create_nutrition(recipe_id: str, new_nutrition_name_code: str, new_nutrition
             execute_insert_script(insert_script)
     elif new_nutrition_name_code == '1':  # calories
         if float(new_nutrition_value) <= float(LOW_CAL_THRESHOLD):
-            # add low-fat badge, if not already present
+            # add low-cal badge, if not already present
             badge_name = "Low Calorie"
             insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
                             f'SELECT {recipe_id}, BadgeID ' \
