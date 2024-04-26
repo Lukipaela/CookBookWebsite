@@ -190,6 +190,7 @@
 }
 .nav-button{
     padding: 1rem;
+
 }
 .submit-button{
     color: black;
@@ -356,7 +357,10 @@
     margin: 1rem;
 
 }
+.ingredient-link{
+    font-weight:500;
 
+}
 .new-ingredient-column-left{
     text-align: right;
     width: 55rem;
@@ -372,7 +376,6 @@
     width: 55rem;
 
 }
-
 .serving-multiplier-button img{
     display:inline-block;
     height: 2rem;

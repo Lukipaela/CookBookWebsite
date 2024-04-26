@@ -39,12 +39,13 @@ prod_mode = False   # master toggle to switch between DEV and PROD modes
 # -------------------- DB METHODS -------------------- #
 def get_ingredients(recipe_id: str):
     query_string = "SELECT IngredientName, CBIngredientPrep.ShortName as Prep, Quantity" \
+                   ", CBIngredientName.RecipeID as RelatedRecipeID " \
                    ", CBIngredientUnit.ShortName as Units, IngredientID " \
                    "FROM CBIngredient " \
                    "JOIN CBIngredientName ON CBIngredient.IngredientNameID = CBIngredientName.IngredientNameID " \
                    "JOIN CBIngredientPrep ON CBIngredientPrep.PrepID = CBIngredient.PrepID " \
                    "JOIN CBIngredientUnit ON CBIngredientUnit.IngredientUnitID = CBIngredient.IngredientUnitID " \
-                   f"WHERE RecipeID = {recipe_id} " \
+                   f"WHERE CBIngredient.RecipeID = {recipe_id} " \
                    f"ORDER BY IngredientName"
     return execute_query(query_string)
 
@@ -84,8 +85,9 @@ def get_badges(recipe_id: str):
 
 
 def get_recent_recipes():
-    query_string = "SELECT RecipeName, CreationGMT, RecipeID " \
+    query_string = "SELECT LongName || ' - ' || RecipeName AS RecipeName, CreationGMT, RecipeID " \
                    "FROM CBRecipe " \
+                   "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "ORDER BY CreationGMT DESC " \
                    "LIMIT 10"
     results = execute_query(query_string)
@@ -597,7 +599,8 @@ def process_search_form(form):
         badge_query_string += "JOIN CBRecipeBadge Vegetarian ON Vegetarian.RecipeID = CBRecipe.RecipeID " \
                               "AND Vegetarian.BadgeID = 4 "
 
-    query_string = "SELECT DISTINCT CBRecipe.RecipeID, RecipeName " \
+    query_string = "SELECT DISTINCT CBRecipe.RecipeID" \
+                   ", RecipeName || ' (' ||CAST(CookingTime AS VarChar(10)) || 'min)' AS RecipeName " \
                    "FROM CBRecipe " \
                    "JOIN CBIngredient ON CBRecipe.RecipeID = CBIngredient.RecipeID " \
                    "JOIN CBIngredientName ON CBIngredient.IngredientNameID = CBIngredientName.IngredientNameID " \
@@ -683,8 +686,9 @@ def home():
 
 
 @app.route('/recipe/<string:recipe_id>', methods=["GET"])
-def recipe(recipe_id: str, multiplier: int = 1):
+def recipe(recipe_id: str):
     ingredients = get_ingredients(recipe_id)
+    print(ingredients)
     nutrition_facts = get_nutrition(recipe_id)
     recipe_instructions = get_instructions(recipe_id)
     recipe_header = get_recipe_header(recipe_id)
@@ -697,7 +701,6 @@ def recipe(recipe_id: str, multiplier: int = 1):
                            , recipe_instructions=recipe_instructions
                            , recipe_header=recipe_header
                            , badges=badges
-                           , multiplier=multiplier
                            , nav_controls=nav_controls)
 
 

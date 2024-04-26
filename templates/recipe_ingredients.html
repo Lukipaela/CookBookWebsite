@@ -18,7 +18,12 @@
             <li class="ingredient-row">
                 <!-- name and preparation -->
                 <div class="ingredient-name">
-                    {{ ingredient['IngredientName'] }}
+                    <!-- if this ingfredient is its own recipe, create a link -->
+                    {% if ingredient['RelatedRecipeID']  %}
+                        <a href="{{ url_for('recipe', recipe_id=ingredient['RelatedRecipeID']) }}" class="ingredient-link">{{ ingredient['IngredientName'] }}</a>
+                    {% else %}
+                        {{ ingredient['IngredientName'] }}
+                    {% endif %}
                     {% if ingredient['Prep'] | length > 0 %}
                         , {{ ingredient['Prep'] }}
                     {% endif %}
