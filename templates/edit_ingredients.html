@@ -151,6 +151,15 @@
                                 </td>
                             </tr>
 
+                            <!-- linked recipe -->
+                            <tr class="JS-linked-recipe-row JS-default-hidden">
+                                <td class="new-ingredient-column-left">
+                                    {{ form.linked_recipe.label }}
+                                </td>
+                                <td class="new-ingredient-column-mid JS-search-name-combo">
+                                    {{ form.linked_recipe(class="combo-wide ingredient-entry-field") }}
+                                </td>
+                            </tr>
 
                             <!-- INGREDIENT PREP -->
                             <tr>
@@ -241,6 +250,10 @@
             //show fields for Search Name
             var searchNameRow = document.getElementsByClassName("JS-search-name-row")[0];
             searchNameRow.classList.remove("JS-default-hidden");
+
+            //show fields for linked recipe
+            var linkedRecipeRow = document.getElementsByClassName("JS-linked-recipe-row")[0];
+            linkedRecipeRow.classList.remove("JS-default-hidden");
         }
 
         function newSearchNameClicked(){

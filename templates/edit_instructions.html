@@ -21,33 +21,37 @@
             <div class="font-size-standard font-highlight editor-section-message">{{ banner_message }}</div>
             <form method="POST" action="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id=instruction_id, banner_message='') }}" novalidate>
                 <div class="instructions-section font-standard">
-                    <table>
+                    <ul>
                         {% for step in recipe_instructions: %}
-                            <tr class="instruction-row">
+                            <li class="instruction-row">
                                 {% if step['InstructionID'] == instruction_id | int %}
                                     <!-- Target instruction to be edited -->
-                                    <td class="instruction-number black-border">{{ step['StepNumber'] }}</td>
-                                    <td class="instruction-text">{{ form.instruction(class="text-area-entry text-area-entry-large") }}</td>
-                                    <td class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</td>
+                                    <div class="instruction-number black-border">{{ step['StepNumber'] }}</div>
+                                    <div class="instruction-text">{{ form.instruction(class="text-area-entry text-area-entry-large") }}</div>
+                                    <div class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</div>
                                 {% else %}
                                     <!-- existing instruction, not editing -->
-                                    <td class="instruction-number black-border">{{ step['StepNumber'] }}</td>
-                                    <td class="instruction-text">{{ step['StepText'] }}</td>
+                                    <div class="instruction-number black-border">{{ step['StepNumber'] }}</div>
+                                    <div class="instruction-text">{{ step['StepText'] }}</div>
                                     {% if instruction_id == "-1" %}
                                         <!-- only show the edit button on the default page, not currently editing -->
-                                        <td class="font-size-tiny"><a href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id=step['InstructionID'], banner_message='') }}">[Edit]</a></td>
+                                        <div class="font-size-tiny"><a href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id=step['InstructionID'], banner_message='') }}">[Edit]</a></div>
                                     {% endif %}
                                 {% endif %}
-                            </tr>
+                            </li>
                         {% endfor %}
                         {% if instruction_id == '0' %}
-                            <!-- adding new instruction -->
-                            <td class="instruction-number black-border"></td>
-                            <td class="instruction-text">{{ form.instruction(class="text-area-entry text-area-entry-large") }}</td>
-                            <td class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</td>
-                            <td><a class="btn btn-danger" href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id='-1', banner_message='Add Step cancelled!') }}" role="button">Cancel</a></td>
+                            <li class="instruction-row">
+                                <!-- adding new instruction -->
+                                <div class="instruction-number black-border"></div>
+                                <div class="instruction-text">{{ form.instruction(class="text-area-entry text-area-entry-large") }}</div>
+                                <div class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</div>
+                                <div class="nav-button">
+                                    <a class="btn btn-danger" href="{{ url_for('edit_instructions', recipe_id=recipe_id, instruction_id='-1', banner_message='Add Step cancelled!') }}" role="button">Cancel</a>
+                                </div>
+                            </li>
                         {% endif %}
-                    </table>
+                    </ul>
                 </div>
                 {% if instruction_id == '-1' %}
                     <!-- only show the 'add a step' button if we aren't already adding a step -->

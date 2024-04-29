@@ -279,9 +279,11 @@ def create_nutrition(recipe_id: str, new_nutrition_name_code: str, new_nutrition
     return new_id
 
 
-def create_ingredient_name(ingredient_name: str, is_vegetarian: str, search_name: str):
-    insert_script = 'INSERT INTO CBIngredientName(IngredientName, IsVegetarian, SearchName) ' \
-                    f'SELECT "{ingredient_name}", "{is_vegetarian}", "{search_name}" '
+def create_ingredient_name(ingredient_name: str, is_vegetarian: str, search_name: str, linked_recipe: int):
+    insert_script = 'INSERT INTO CBIngredientName(IngredientName, IsVegetarian, SearchName, RecipeID) ' \
+                    f'SELECT "{ingredient_name}", "{is_vegetarian}", "{search_name}" ' \
+                    f', IIF({linked_recipe} == -1, NULL, {linked_recipe}) '
+    print(insert_script)
     new_id = execute_insert_script(insert_script, table_name='CBIngredientName', id_column='IngredientNameID')
     return new_id
 
@@ -553,6 +555,7 @@ def process_ingredient_form(form):
     ingredient_unit_code = form["ingredient_unit"]
     new_ingredient_unit = form["ingredient_unit_new"]
     ingredient_id = form["ingredient_id"]
+    linked_recipe = form["linked_recipe"]
 
     if ingredient_id == '0':    # creating a new ingredient record
         # check if the new_ fields are populated.
@@ -561,7 +564,8 @@ def process_ingredient_form(form):
             if new_search_name != '':
                 search_name = new_search_name
             # create new ingredient record if new name text field was used
-            ingredient_name_code = create_ingredient_name(new_ingredient_name, is_vegetarian, search_name)
+            ingredient_name_code = create_ingredient_name(new_ingredient_name, is_vegetarian, search_name
+                                                          , linked_recipe)
         if new_ingredient_prep != '':
             # create new ingredient record if new name text field was used
             ingredient_prep_code = create_ingredient_prep(new_ingredient_prep)

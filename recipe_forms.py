@@ -51,6 +51,9 @@ class RecipeIngredientForm(FlaskForm):
     __ingredient_search_name = execute_query(__query_string, convert_to_dict=False)
     search_name = SelectField(label="Search Term", choices=__ingredient_search_name)
     search_name_new = StringField(label="New Search Term", render_kw={"placeholder": "Pasta, Chicken, Etc."})
+    __query_string = "SELECT -1, '' UNION SELECT RecipeID, RecipeName FROM CBRecipe ORDER BY 2 ASC"
+    __recipes = execute_query(__query_string, convert_to_dict=False)
+    linked_recipe = SelectField(label="Linked Recipe", choices=__recipes)
     # Hidden fields
     ingredient_id = StringField(label="Ingredient ID")
     recipe_id = IntegerField(label="Recipe ID")
@@ -104,13 +107,13 @@ class DatabaseForm(FlaskForm):
 
 
 class EmailRecipeForm(FlaskForm):
-    recipe_name = StringField(label="Recipe Name:")
-    recipe_source = StringField(label="Recipe Source:")
+    recipe_name = StringField(label="Recipe Name:", render_kw={"placeholder": "Tacos de chorizo"})
+    recipe_source = StringField(label="Recipe Source:", render_kw={"placeholder": "www.someplace.com / Memom's secret recipe."})
     total_time = IntegerField(label="Total Time:")
     servings = IntegerField(label="Servings:")
-    instructions = TextAreaField(label="Instructions:")
-    ingredients = TextAreaField(label="Ingredients:")
-    nutrition = TextAreaField(label="Nutrition:")
+    instructions = TextAreaField(label="Instructions:", render_kw={"placeholder": "Step 1: Bend the taco shells.."})
+    ingredients = TextAreaField(label="Ingredients:", render_kw={"placeholder": "Flat tortillas x6, chorizo x3lbs.."})
+    nutrition = TextAreaField(label="Nutrition:", render_kw={"placeholder": "Sat fat: 2g, Calories: 600.."})
     # submit
     submit = SubmitField(label="Send to Dan!")
 
