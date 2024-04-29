@@ -33,7 +33,7 @@ LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod
-prod_mode = False   # master toggle to switch between DEV and PROD modes
+prod_mode = True   # master toggle to switch between DEV and PROD modes
 
 
 # -------------------- DB METHODS -------------------- #
@@ -283,7 +283,6 @@ def create_ingredient_name(ingredient_name: str, is_vegetarian: str, search_name
     insert_script = 'INSERT INTO CBIngredientName(IngredientName, IsVegetarian, SearchName, RecipeID) ' \
                     f'SELECT "{ingredient_name}", "{is_vegetarian}", "{search_name}" ' \
                     f', IIF({linked_recipe} == -1, NULL, {linked_recipe}) '
-    print(insert_script)
     new_id = execute_insert_script(insert_script, table_name='CBIngredientName', id_column='IngredientNameID')
     return new_id
 
