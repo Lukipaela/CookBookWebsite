@@ -399,15 +399,19 @@
 
 /* INGREDIENT CHECKLIST */
 .ingredient-checklist{
-    padding-top: 7rem;
-    max-width: 80%;
+    padding-top: 5rem;
+    padding-bottom: 1rem;
+    margin:auto;
 }
 .checklist-row{
-    text-align: left;
+    padding-bottom: .5rem;
 }
 .checked-item{
     text-decoration: line-through;
     opacity: 30%;
+}
+.checklist-page-title{
+    padding-top: 7rem;
 }
 
 /* INSTRUCTIONS */
