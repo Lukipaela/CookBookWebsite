@@ -105,7 +105,8 @@ def get_site_stats():
 
 
 def get_recipe_checklist(recipe_id: str, multiplier: int):
-    query_string = f"SELECT IngredientName || ' - ' || cast(Quantity * {multiplier} AS VarChar(20)) " \
+    query_string = f"SELECT IngredientName || ' - ' " \
+                   f"|| CAST(Quantity * CAST({multiplier} AS Decimal) / Servings AS VarChar(20)) " \
                    "|| ' ' || CBIngredientUnit.LongName 'details' " \
                    "FROM CBRecipe " \
                    "JOIN CBIngredient ON CBIngredient.RecipeID = CBRecipe.RecipeID " \
