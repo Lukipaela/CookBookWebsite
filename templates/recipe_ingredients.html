@@ -18,7 +18,7 @@
             <li class="ingredient-row">
                 <!-- name and preparation -->
                 <div class="ingredient-name">
-                    <!-- if this ingfredient is its own recipe, create a link -->
+                    <!-- if this ingredient is its own recipe, create a link -->
                     {% if ingredient['RelatedRecipeID']  %}
                         <a href="{{ url_for('recipe', recipe_id=ingredient['RelatedRecipeID']) }}" class="ingredient-link">{{ ingredient['IngredientName'] }}</a>
                     {% else %}
@@ -38,7 +38,10 @@
             </li>
         {% endfor %}
     </ul>
-    <div class="font-size-tiny centered">
+    <span class="export-button centered">
+        <div role="button" onclick="exportIngredientList()" class="btn-warning btn">Get Shopping Checkist</div>
+    </span>
+    <div class="font-size-tiny centered font-standard">
         <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}" class="JS-edit-button JS-default-hidden">[Edit]</a>
     </div>
 </div>
@@ -72,6 +75,16 @@
             var newQuantity = currentQuantity / currentServings * newServings;
             ingredientQuantities[i].textContent = newQuantity;
         }
+    }
+
+    function exportIngredientList(){
+        recipeChecklistURL = {{ url_for("ingredient_checklist", recipe_id=recipe_id)|tojson }};
+        console.log(recipeChecklistURL);
+        var currentServingsNode = document.getElementsByClassName("JS-recipe-servings")[0];
+        var currentServings = Number(currentServingsNode.textContent);
+        recipeChecklistURL = recipeChecklistURL + "?multiplier=" + currentServings
+        console.log(recipeChecklistURL);
+        window.location.href = recipeChecklistURL;
     }
 
 </script>

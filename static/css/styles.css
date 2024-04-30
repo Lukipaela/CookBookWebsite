@@ -397,6 +397,18 @@
     margin-bottom: 5rem;
 }
 
+/* INGREDIENT CHECKLIST */
+.ingredient-checklist{
+    padding-top: 7rem;
+    max-width: 80%;
+}
+.checklist-row{
+    text-align: left;
+}
+.checked-item{
+    text-decoration: line-through;
+    opacity: 30%;
+}
 
 /* INSTRUCTIONS */
 .instructions-section{

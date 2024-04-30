@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+Ingredients
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+    <div class="theme-background"></div>
+
+    <div class="body">
+
+        <!-- Nav Bar -->
+        {% include "nav_buttons.html" %}
+
+        <ul class="ingredient-checklist">
+            {% for item in items: %}
+                <li class="checklist-row">
+                    <!-- name and preparation -->
+                    <div class="checklist-item font-standard font-size-standard"
+                         id="{{ item['details'] }}"
+                         onclick="itemClicked('{{ item['details'] }}')">
+                        {{ item['details'] }}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Footer-->
+        {% include "footer.html" %}
+    </div>
+
+
+    <!-- JS scripts -->
+    <script>
+        function itemClicked(itemID){
+            var clickedItem = document.getElementById(itemID);
+            if(clickedItem.classList.contains("checked-item"))
+                clickedItem.classList.remove("checked-item");
+            else
+                clickedItem.classList.add("checked-item");
+        }
+
+    </script>
+
+
+
+
+{% endblock %}
