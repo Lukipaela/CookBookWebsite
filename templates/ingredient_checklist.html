@@ -58,7 +58,7 @@ Ingredients
             var copiedText = "";
             var iterations = items.length;
             for (var i = 0; i < iterations; i++) {
-                copiedText += items[i].textContent;
+                copiedText += items[i].textContent.trim() + "\n";
             }
 
             // Copy the text inside the text field
