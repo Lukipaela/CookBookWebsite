@@ -104,20 +104,6 @@ def get_site_stats():
     return results
 
 
-def get_recipe_checklist(recipe_id: str, multiplier: int):
-    query_string = f"SELECT IngredientName || ' - ' " \
-                   f"|| CAST(Quantity * CAST({multiplier} AS Real) / Servings AS VarChar(20)) " \
-                   "|| ' ' || CBIngredientUnit.LongName 'details' " \
-                   "FROM CBRecipe " \
-                   "JOIN CBIngredient ON CBIngredient.RecipeID = CBRecipe.RecipeID " \
-                   "JOIN CBIngredientName ON CBIngredientName.IngredientNameID = CBIngredient.IngredientNameID " \
-                   "AND IngredientName NOT IN ('Salt', 'Black Pepper') " \
-                   "JOIN CBIngredientUnit ON CBIngredientUnit.IngredientUnitID = CBIngredient.IngredientUnitID " \
-                   f"WHERE CBRecipe.RecipeID = {recipe_id} " \
-                   "ORDER BY 1"
-    return execute_query(query_string)
-
-
 def update_header(recipe_id: str, new_recipe_name: str, new_recipe_time: int
                   , new_recipe_servings: int, new_recipe_source: str, recipe_type_id: str):
     update_script = "UPDATE CBRecipe " \
@@ -885,17 +871,6 @@ def email_recipe():
         message = "Email sent. \n Thank you for the contribution!"
     nav_controls = create_nav_controls(home_button=True)
     return render_template("email_recipe.html", message=message, form=form, nav_controls=nav_controls)
-
-
-@app.route('/ingredient_checklist/<string:recipe_id>', methods=["GET"])
-def ingredient_checklist(recipe_id: str):
-    multiplier = 1
-    if 'multiplier' in request.args:  # optional arg
-        multiplier = request.args['multiplier']
-    print(request.args)
-    nav_controls = create_nav_controls(home_button=True, recipe_button=True, recipe_id=recipe_id)
-    items = get_recipe_checklist(recipe_id=recipe_id, multiplier=multiplier)
-    return render_template("ingredient_checklist.html", nav_controls=nav_controls, items=items)
 
 
 # -------------------- RUN -------------------- #

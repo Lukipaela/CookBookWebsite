@@ -15,14 +15,18 @@
 
     <ul>
         {% for ingredient in ingredients: %}
-            <li class="ingredient-row">
+            <li class="ingredient-row checklist-item"
+                         id="{{ ingredient['IngredientName'] }}"
+                         onclick="itemClicked('{{ ingredient['IngredientName'] }}')">
                 <!-- name and preparation -->
                 <div class="ingredient-name">
                     <!-- if this ingredient is its own recipe, create a link -->
                     {% if ingredient['RelatedRecipeID']  %}
-                        <a href="{{ url_for('recipe', recipe_id=ingredient['RelatedRecipeID']) }}" class="ingredient-link">{{ ingredient['IngredientName'] }}</a>
+                        <a href="{{ url_for('recipe', recipe_id=ingredient['RelatedRecipeID']) }}" class="ingredient-link">
+                            <span class="JS-copy-element">{{ ingredient['IngredientName'] }}</span>
+                        </a>
                     {% else %}
-                        {{ ingredient['IngredientName'] }}
+                        <span class="JS-copy-element">{{ ingredient['IngredientName'] }}</span>
                     {% endif %}
                     {% if ingredient['Prep'] | length > 0 %}
                         , {{ ingredient['Prep'] }}
@@ -30,17 +34,24 @@
                 </div>
                 <!-- quantity and units -->
                 <div class="ingredient-quantity">
-                    <span class="JS-ingredient-quantity">
+                    <span class="JS-ingredient-quantity JS-copy-element">
                         {{ ingredient['Quantity'] }}
                     </span>
-                    {{ ingredient['Units'] }}
+                    <span class="JS-copy-element">{{ ingredient['Units'] }}</span>
                 </div>
             </li>
         {% endfor %}
     </ul>
+    <hr class="separator">
+    <div class="font-standard font-size-standard centered checklist-note">
+        Click on items to check them off as you shop, or copy the whole list to your clipboard to easily paste into your preferred grocery list app!
+    </div>
+
+    <!-- copy to clipboard button -->
     <span class="centered">
-        <div role="button" onclick="exportIngredientList()" class="btn-warning btn">Get Shopping Checkist</div>
+        <div role="button" onclick="copyIngredientsToClipboard()" class="btn-warning btn">Copy to my clipboard</div>
     </span>
+    <!-- edit button -->
     <div class="font-size-tiny centered font-standard">
         <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}" class="JS-edit-button JS-default-hidden">[Edit]</a>
     </div>
@@ -77,14 +88,39 @@
         }
     }
 
-    function exportIngredientList(){
-        recipeChecklistURL = {{ url_for("ingredient_checklist", recipe_id=recipe_id)|tojson }};
-        console.log(recipeChecklistURL);
-        var currentServingsNode = document.getElementsByClassName("JS-recipe-servings")[0];
-        var currentServings = Number(currentServingsNode.textContent);
-        recipeChecklistURL = recipeChecklistURL + "?multiplier=" + currentServings
-        console.log(recipeChecklistURL);
-        window.location.href = recipeChecklistURL;
+    function itemClicked(itemID){
+        var clickedItem = document.getElementById(itemID);
+        if(clickedItem.classList.contains("checked-item"))
+            clickedItem.classList.remove("checked-item");
+        else
+            clickedItem.classList.add("checked-item");
+    }
+
+    function copyIngredientsToClipboard(){
+        var items = document.getElementsByClassName("checklist-item");
+        var copiedText = "";
+        var iterations = items.length;
+        for (var i = 0; i < iterations; i++) {
+            var textElements = items[i].getElementsByClassName("JS-copy-element");
+            //ingredient name
+            var ingredientName = textElements[0].textContent.trim();
+            copiedText += ingredientName;
+
+            if( ingredientName != 'Salt' && ingredientName != 'Sea Salt' && ingredientName != 'Black Pepper'){
+                //ingredient quantity
+                copiedText += ' - ' + textElements[1].textContent.trim() + ' ';
+
+                //ingredient units
+                copiedText += textElements[2].textContent.trim();
+            }
+           copiedText += '\n';
+        }
+
+        // Copy the text inside the text field
+        navigator.clipboard.writeText(copiedText);
+
+        // Alert the copied text
+        alert("Copied the following text to your clipboard: \n\n" + copiedText);
     }
 
 </script>

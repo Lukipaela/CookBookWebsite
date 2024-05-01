@@ -42,6 +42,7 @@
 
 
 
+
   /* Fonts */
   --font-highlight: "Mali";
   --font-standard: "Kodchasan";
@@ -398,21 +399,13 @@
 }
 
 /* INGREDIENT CHECKLIST */
-.ingredient-checklist{
-    padding-top: 5rem;
-    padding-bottom: 1rem;
-    margin:auto;
-}
-.checklist-row{
-    padding-bottom: .5rem;
-
-}
 .checked-item{
     text-decoration: line-through;
     opacity: 30%;
 }
-.checklist-page-title{
-    padding-top: 7rem;
+.checklist-note{
+    padding-bottom: 1rem;
+
 }
 
 /* INSTRUCTIONS */
@@ -560,7 +553,6 @@
 }
 
 /* WIDGETS */
-
 @media (max-width: 700px){
     .widget{
         width: 90%;
@@ -579,10 +571,6 @@
 }
 .widget-title{
     padding-bottom:2rem;
-
-}
-.recent-recipes-section{
-
 
 }
 .search-widget-row td{
@@ -608,6 +596,13 @@ ul{
     list-style-type: none;
 }
 
+.separator{
+    margin: 2rem 0;
+    border-style: solid;
+    border-color: var(--theme-borders);
+    color: var(--theme-borders);
+    background-color: var(--theme-borders);
+}
 /* ==================== IDs ==================== */
 
 
