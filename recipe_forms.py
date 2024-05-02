@@ -77,7 +77,9 @@ class RecipeNutritionForm(FlaskForm):
 
 
 class RecipeSearchForm(FlaskForm):
-    __query_string = "SELECT RecipeTypeID, LongName " \
+    __query_string = "SELECT '0', 'All' " \
+                     "UNION " \
+                     "SELECT RecipeTypeID, LongName " \
                      "FROM CBRecipeType " \
                      "ORDER BY 2 ASC"
     __recipe_types = execute_query(__query_string, convert_to_dict=False)

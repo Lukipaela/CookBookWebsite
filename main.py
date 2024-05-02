@@ -33,7 +33,7 @@ LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod
-prod_mode = True   # master toggle to switch between DEV and PROD modes
+prod_mode = False   # master toggle to switch between DEV and PROD modes
 
 
 # -------------------- DB METHODS -------------------- #
@@ -476,7 +476,7 @@ def configure_ingredient_form(recipe_id: str, ingredient_id: str):
 
 def configure_search_form():
     form = RecipeSearchForm()
-    form.recipe_type.process_data(1)
+    form.recipe_type.process_data(0)    # set default option to "all"
     return form
 
 
@@ -601,6 +601,9 @@ def process_search_form(form):
     if "vegetarian" in form:    # presence of a boolean field means it was checked off.
         badge_query_string += "JOIN CBRecipeBadge Vegetarian ON Vegetarian.RecipeID = CBRecipe.RecipeID " \
                               "AND Vegetarian.BadgeID = 4 "
+    recipe_type_query_string = ""
+    if recipe_type != 0:
+        recipe_type_query_string = f"AND CBRecipe.RecipeTypeID = '{recipe_type}'"
 
     query_string = "SELECT DISTINCT CBRecipe.RecipeID" \
                    ", RecipeName || ' (' ||CAST(CookingTime AS VarChar(10)) || 'min)' AS RecipeName " \
@@ -608,8 +611,8 @@ def process_search_form(form):
                    "JOIN CBIngredient ON CBRecipe.RecipeID = CBIngredient.RecipeID " \
                    "JOIN CBIngredientName ON CBIngredient.IngredientNameID = CBIngredientName.IngredientNameID " \
                    f"AND CBIngredientName.SearchName LIKE '{ingredient_search_name}' " \
-                   "" + badge_query_string + f"WHERE CBRecipe.RecipeTypeID = '{recipe_type}' " \
-                                             f"AND RecipeName LIKE '{search_keyword}' "
+                   "" + badge_query_string + \
+                   f"WHERE RecipeName LIKE '{search_keyword}' " + recipe_type_query_string
     search_results = execute_query(query_string)
     return search_results
 

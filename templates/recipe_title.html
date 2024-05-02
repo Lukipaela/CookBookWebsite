@@ -5,8 +5,13 @@
     {% if badges|length != 0 %}
         <div class="badges">
             {% for badge in badges: %}
-                <div class="badge-image black-border">
-                    <img src="../static/assets/ico/badges/{{ badge['BadgeIconAddress'] }}.png" alt="{{ badge['BadgeName'] }}" title="{{ badge['BadgeName'] }}">
+                <div class="badge-tile">
+                    <div class="badge-image black-border">
+                        <img src="../static/assets/ico/badges/{{ badge['BadgeIconAddress'] }}.png" alt="{{ badge['BadgeName'] }}" title="{{ badge['BadgeName'] }}">
+                    </div>
+                    <div class="badge-subtitle font-standard font-size-small">
+                        {{ badge['BadgeName'] }}
+                    </div>
                 </div>
             {% endfor %}
         </div>
