@@ -36,7 +36,15 @@
                     <div class="nav-button">
                         {{ search_form.submit(class="btn btn-warning submit-button font-standard") }}
                     </div>
+                    <div class="badge-definitions">
+                        {% for definition in badge_definitions: %}
+                            <div class="font-standard font-size-tiny">
+                                {{ definition }}
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
+
             </form>
         </div>
     </div>

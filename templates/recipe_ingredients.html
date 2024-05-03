@@ -42,19 +42,22 @@
             </li>
         {% endfor %}
     </ul>
-    <hr class="separator">
-    <div class="font-standard font-size-standard centered checklist-note">
-        Click on items to check them off as you shop, or copy the whole list to your clipboard to easily paste into your preferred grocery list app!
-    </div>
-
-    <!-- copy to clipboard button -->
-    <span class="centered">
-        <div role="button" onclick="copyIngredientsToClipboard()" class="btn-warning btn">Copy to my clipboard</div>
-    </span>
     <!-- edit button -->
     <div class="font-size-tiny centered font-standard">
         <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}" class="JS-edit-button JS-default-hidden">[Edit]</a>
     </div>
+
+    <!-- dividing line -->
+    <hr class="separator">
+
+    <!-- clipboard message -->
+    <div class="font-standard font-size-standard centered checklist-note">
+        Click on items to check them off as you shop, or copy the whole list to your clipboard to easily paste into your preferred grocery list app!
+    </div>
+    <!-- copy to clipboard button -->
+    <span class="centered">
+        <div role="button" onclick="copyIngredientsToClipboard()" class="btn-warning btn">Copy to my clipboard</div>
+    </span>
 </div>
 
 <!-- JS scripts -->
@@ -84,6 +87,8 @@
         for (var i = 0; i < iterations; i++) {
             var currentQuantity = Number(ingredientQuantities[i].textContent);
             var newQuantity = currentQuantity / currentServings * newServings;
+            // round to 3 places
+            newQuantity = Math.round((newQuantity + Number.EPSILON) * 1000) / 1000;
             ingredientQuantities[i].textContent = newQuantity;
         }
     }

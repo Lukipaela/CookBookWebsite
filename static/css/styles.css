@@ -348,6 +348,9 @@
 }
 
 /* HOME PAGE */
+.search-table{
+    text-align: center;
+}
 .search-table table{
     text-align: center;
     width: 100%;
@@ -645,6 +648,21 @@
     height: 100%;
     width: 100%;
 }
+.badge-definitions{
+    margin:0 auto;
+
+}
+@media (max-width: 700px){
+    .badge-definitions{
+        max-width: 80%;
+    }
+}
+@media (min-width: 700px){
+    .badge-definitions{
+        max-width: 60%;
+    }
+}
+
 
 /* ==================== ELEMENTS ==================== */
 body{

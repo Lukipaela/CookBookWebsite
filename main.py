@@ -33,7 +33,7 @@ LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod
-prod_mode = True  # master toggle to switch between DEV and PROD modes
+prod_mode = False  # master toggle to switch between DEV and PROD modes
 
 
 # -------------------- DB METHODS -------------------- #
@@ -657,6 +657,14 @@ def create_nav_controls(home_button: bool = False, recipe_button: bool = False, 
     }
 
 
+def get_badge_definitions():
+    definitions = [
+        f"Low Fat: <= {LOW_FAT_MEAL_THRESHOLD}g Sat Fat,   Low Cal: <= {LOW_CAL_THRESHOLD}cal,"
+        , f"Quick Meal: <= {QUICK_MEAL_THRESHOLD}min total prep & cook time"
+    ]
+    return definitions
+
+
 # -------------------- APP ROUTES -------------------- #
 @app.route('/', methods=["GET", "POST"])
 def home():
@@ -665,6 +673,7 @@ def home():
     site_stats = get_site_stats()
     recent_recipes = get_recent_recipes()
     search_form = configure_search_form()
+    badge_definitions = get_badge_definitions()
     search_results = []
     message = ""
     if request.method == 'POST':
@@ -681,14 +690,16 @@ def home():
                                , search_form=search_form
                                , search_results=search_results
                                , message=message
-                               , prod_mode=prod_mode)
+                               , prod_mode=prod_mode
+                               , badge_definitions=badge_definitions)
     else:
         return render_template("index.html"
                                , recent_recipes=recent_recipes
                                , site_stats=site_stats
                                , search_form=search_form
                                , search_results=search_results
-                               , prod_mode=prod_mode)
+                               , prod_mode=prod_mode
+                               , badge_definitions=badge_definitions)
 
 
 @app.route('/recipe/<string:recipe_id>', methods=["GET"])
