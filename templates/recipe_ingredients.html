@@ -26,11 +26,7 @@
                             <span class="JS-copy-element">{{ ingredient['IngredientName'] }}</span>
                         </a>
                     {% else %}
-                        <span class="JS-copy-element">{{ ingredient['IngredientName'] }}</span>
-                    {% endif %}
-                    {% if ingredient['Prep'] | length > 0 %}
-                        , {{ ingredient['Prep'] }}
-                    {% endif %}
+                        <span class="JS-copy-element">{{ ingredient['IngredientName'] }}</span>{% endif %}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }}{% endif %}
                 </div>
                 <!-- quantity and units -->
                 <div class="ingredient-quantity">
