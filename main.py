@@ -95,11 +95,13 @@ def get_recent_recipes():
 
 
 def get_site_stats():
-    query_string = "SELECT CBRecipeType.LongName 'Category', COUNT(*) 'Count'" \
+    query_string = "SELECT CBRecipeType.LongName 'Category', COUNT(*) 'Count', 1 " \
                    "FROM CBRecipeType " \
                    "JOIN CBRecipe ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "GROUP BY CBRecipeType.LongName " \
-                   "ORDER BY 1 ASC"
+                   "UNION SELECT 'TOTAL', COUNT(*), 0 " \
+                   "FROM CBRecipe " \
+                   "ORDER BY 3 DESC, 1 ASC"
     results = execute_query(query_string)
     return results
 
@@ -606,13 +608,18 @@ def process_search_form(form):
         recipe_type_query_string = f"AND CBRecipe.RecipeTypeID = '{recipe_type}'"
 
     query_string = "SELECT DISTINCT CBRecipe.RecipeID" \
-                   ", RecipeName || ' (' ||CAST(CookingTime AS VarChar(10)) || 'min)' AS RecipeName " \
+                   f", IIF({recipe_type} = 0, CBRecipeType.ShortName || ' - ', '') " \
+                   "|| RecipeName " \
+                   "|| ' (' " \
+                   "|| CAST(CookingTime AS VarChar(10)) " \
+                   "|| 'min)' AS RecipeName " \
                    "FROM CBRecipe " \
+                   "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "JOIN CBIngredient ON CBRecipe.RecipeID = CBIngredient.RecipeID " \
                    "JOIN CBIngredientName ON CBIngredient.IngredientNameID = CBIngredientName.IngredientNameID " \
                    f"AND CBIngredientName.SearchName LIKE '{ingredient_search_name}' " \
                    "" + badge_query_string + \
-                   f"WHERE RecipeName LIKE '{search_keyword}' " + recipe_type_query_string
+                   f"WHERE RecipeName LIKE '{search_keyword}' " + recipe_type_query_string + " ORDER BY 2"
     search_results = execute_query(query_string)
     return search_results
 
