@@ -608,7 +608,7 @@ def process_search_form(form):
         recipe_type_query_string = f"AND CBRecipe.RecipeTypeID = '{recipe_type}'"
 
     query_string = "SELECT DISTINCT CBRecipe.RecipeID" \
-                   f", IIF({recipe_type} = 0, CBRecipeType.ShortName || ' - ', '') " \
+                   f", CASE WHEN {recipe_type} = 0 THEN CBRecipeType.ShortName || ' - ' ELSE '' END " \
                    "|| RecipeName " \
                    "|| ' (' " \
                    "|| CAST(CookingTime AS VarChar(10)) " \
