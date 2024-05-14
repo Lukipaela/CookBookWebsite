@@ -35,6 +35,8 @@ NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod
 prod_mode = True   # master toggle to switch between DEV and PROD modes
 
+# create a lookup table for ElementID by NutritionNameID
+nutrition_units_by_name_id = {"1": 1, "2": 2, "3": 2, "4": 3, "5": 2, "6": 2, "7": 2, "8": 3, "9": 2}
 
 # -------------------- DB METHODS -------------------- #
 def get_ingredients(recipe_id: str):
@@ -376,34 +378,26 @@ def configure_nutrition_form(recipe_id: str, nutrition_id: str, nutrition_facts:
     # Initialize instruction Fields
     nutrition_name_code = '1'
     nutrition_value = None
-    nutrition_unit = '2'    # grams is default
     if nutrition_id == DEFAULT_EDITOR_PAGE_INDEX:
         # default page (no editing)
         form.nutrition_name.data = nutrition_name_code
         form.nutrition_value.data = nutrition_value
-        form.nutrition_unit.data = nutrition_unit
     elif nutrition_id == NEW_RECORD_PAGE_INDEX:
         # Add new element page
         form.nutrition_name.data = nutrition_name_code
         form.nutrition_value.data = nutrition_value
-        form.nutrition_unit.data = nutrition_unit
     else:
         # get the current data associated with this ID
         for fact in nutrition_facts:
             if str(fact['NutritionID']) == nutrition_id:
                 nutrition_name_code = fact['ElementNameCode']
                 nutrition_value = fact['NutritionValue']
-                nutrition_unit = fact['UnitsCode']
                 break
         query_string = "SELECT ElementNameID, LongName FROM CBElementName ORDER BY 2 ASC"
         nutrition_element_names = execute_query(query_string, convert_to_dict=False)
         form.nutrition_name.choices = nutrition_element_names
         form.nutrition_name.data = str(nutrition_name_code)
         form.nutrition_value.data = nutrition_value
-        query_string = "SELECT ElementUnitID, LongName FROM CBElementUnit ORDER BY 2 ASC"
-        nutrition_units = execute_query(query_string, convert_to_dict=False)
-        form.nutrition_unit.choices = nutrition_units
-        form.nutrition_unit.data = str(nutrition_unit)
     form.recipe_id.data = recipe_id
     form.nutrition_id.data = nutrition_id
     return form
@@ -523,7 +517,7 @@ def process_nutrition_form(form):
     # pull data from the form
     nutrition_name_code = form["nutrition_name"]
     nutrition_value = form["nutrition_value"]
-    nutrition_unit_code = form["nutrition_unit"]
+    nutrition_unit_code = nutrition_units_by_name_id[nutrition_name_code]
     recipe_id = form["recipe_id"]
     nutrition_id = form["nutrition_id"]
     if nutrition_id != NEW_RECORD_PAGE_INDEX:

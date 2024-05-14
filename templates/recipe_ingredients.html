@@ -39,9 +39,11 @@
         {% endfor %}
     </ul>
     <!-- edit button -->
-    <div class="font-size-tiny centered font-standard">
-        <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}" class="JS-edit-button JS-default-hidden">[Edit]</a>
-    </div>
+    {% if nav_controls['edit'] == True %}
+        <div class="font-size-tiny centered font-standard">
+            <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}">[Edit Ingredients]</a>
+        </div>
+    {% endif %}
 
     <!-- dividing line -->
     <hr class="separator">

@@ -48,7 +48,7 @@
                         <a class="btn btn-success" href="{{ url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id='0') }}" role="button">Add Fact</a>
                     </div>
                 {% endif %}
-                <!-- ADD INPUT FIELDS HERE -->
+                <!-- "ADD" INPUT FIELDS HERE -->
                 {% if nutrition_id != '-1' %}
                 <div class="nutrition-entry-table">
                     <table>
@@ -59,10 +59,6 @@
                         <tr>
                             <td class="nutrition-entry-table-label">{{ form.nutrition_value.label(class="nutrition-label") }}</td>
                             <td class="nutrition-entry-table-field">{{ form.nutrition_value(class="combo-standard") }}</td>
-                        </tr>
-                        <tr>
-                            <td class="nutrition-entry-table-label">{{ form.nutrition_unit.label(class="nutrition-label") }}</td>
-                            <td class="nutrition-entry-table-field">{{ form.nutrition_unit(class="combo-standard") }}</td>
                         </tr>
                     </table>
                     <br>

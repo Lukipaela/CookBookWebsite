@@ -67,8 +67,6 @@ class RecipeNutritionForm(FlaskForm):
     nutrition_name = SelectField(label="Nutrition Element", choices=__nutrition_element_names)
     nutrition_value = DecimalField(label="Amount")
     __query_string = "SELECT ElementUnitID, LongName FROM CBElementUnit ORDER BY 2 ASC"
-    __nutrition_units = execute_query(__query_string, convert_to_dict=False)
-    nutrition_unit = SelectField(label="Unit", choices=__nutrition_units)
     # Hidden fields
     nutrition_id = StringField(label="Nutrition ID")
     recipe_id = IntegerField(label="Recipe ID")
