@@ -37,6 +37,9 @@
                                     <div class="font-size-tiny centered">
                                         <a href="{{ url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id=fact['NutritionID']) }}">[Edit]</a>
                                     </div>
+                                    <div class="font-size-tiny centered">
+                                        <a href="{{ url_for('delete_nutrition', recipe_id=recipe_id, nutrition_id=fact['NutritionID']) }}">[Delete]</a>
+                                    </div>
                                 {% endif %}
                             </div>
                         {% endif %}

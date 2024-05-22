@@ -22,6 +22,7 @@ def execute_query(query_string: str, convert_to_dict=True):
                 print(result)
                 return result
     except sqlite3.Error as e:
+        print('QUERY ERROR:   ' + e.args[0])
         return e.args[0]
 
 
@@ -32,6 +33,7 @@ def execute_update_script(script_string: str):
             db_cursor = con.cursor()
             db_cursor.execute(script_string)
     except sqlite3.Error as e:
+        print('UPDATE SCRIPT ERROR:   ' + e.args[0])
         return e.args[0]
 
 
@@ -51,6 +53,7 @@ def execute_insert_script(script_string: str, table_name: str = None, id_column:
             else:
                 return None
     except sqlite3.Error as e:
+        print('INSERT SCRIPT ERROR:   ' + e.args[0])
         return e.args[0]
 
 
@@ -61,6 +64,7 @@ def execute_delete_script(script_string: str):
             db_cursor = con.cursor()
             db_cursor.execute(script_string)
     except sqlite3.Error as e:
+        print('DELETE SCRIPT ERROR:   ' + e.args[0])
         return e.args[0]
 
 
@@ -73,4 +77,5 @@ def execute_general_sql(sql_string):
             print(response)
             return response
     except sqlite3.Error as e:
+        print('GENERAL SQL ERROR:   ' + e.args[0])
         return e.args[0]

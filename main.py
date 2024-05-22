@@ -33,10 +33,11 @@ LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod
-prod_mode = True   # master toggle to switch between DEV and PROD modes
+prod_mode = False   # master toggle to switch between DEV and PROD modes
 
 # create a lookup table for ElementID by NutritionNameID
 nutrition_units_by_name_id = {"1": 1, "2": 2, "3": 2, "4": 3, "5": 2, "6": 2, "7": 2, "8": 3, "9": 2}
+
 
 # -------------------- DB METHODS -------------------- #
 def get_ingredients(recipe_id: str):
@@ -325,6 +326,21 @@ def create_ingredient(recipe_id: str, ingredient_name_id: str, quantity: str, pr
     return new_id
 
 
+def delete_recipe_ingredient(ingredient_id: str):
+    delete_script = f'DELETE FROM CBIngredient WHERE IngredientID = "{ingredient_id}"'
+    execute_delete_script(delete_script)
+
+
+def delete_recipe_nutrition_fact(nutrition_id: str):
+    delete_script = f'DELETE FROM CBNutrition WHERE NutritionID = "{nutrition_id}"'
+    execute_delete_script(delete_script)
+
+
+def delete_recipe_instruction(instruction_id: str):
+    delete_script = f'DELETE FROM CBInstructions WHERE InstructionID = "{instruction_id}"'
+    execute_delete_script(delete_script)
+
+
 # ------------------- FORM HANDLERS --------------------- #
 def configure_header_form(recipe_id: str, recipe_header: dict):
     print(f"configuring header form for recipe_id: {recipe_id}")
@@ -440,6 +456,8 @@ def configure_ingredient_form(recipe_id: str, ingredient_id: str):
         form.ingredient_unit.data = default_combo_value
         query_string = "SELECT IngredientUnitID, LongName FROM CBIngredientUnit ORDER BY 2 ASC"
         form.ingredient_unit.choices = execute_query(query_string, convert_to_dict=False)
+        query_string = "SELECT -1, '' UNION SELECT RecipeID, RecipeName FROM CBRecipe ORDER BY 2 ASC"
+        form.linked_recipe.choices = execute_query(query_string, convert_to_dict=False)
 
         form.ingredient_quantity.data = default_quantity
 
@@ -769,7 +787,7 @@ def edit_instructions(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         # commit those changes to the Database, if applicable overwrite recipe_id with newly generated value
         process_instruction_form(request.form)
         if instruction_id == NEW_RECORD_PAGE_INDEX:
-            banner_message = 'New Ingredient saved!'
+            banner_message = 'New Instruction saved!'
         else:
             banner_message = "Change saved!"
 
@@ -792,6 +810,15 @@ def edit_instructions(recipe_id: str = NEW_RECORD_PAGE_INDEX):
                                , form=form
                                , banner_message=banner_message
                                , nav_controls=nav_controls)
+
+
+@app.route('/delete_instruction/<string:recipe_id>', methods=["GET"])
+def delete_instruction(recipe_id: str):
+    instruction_id = request.args['instruction_id']
+    print(f"{request.method} method request for delete_instruction called with recipe_id: {recipe_id} "
+          f"and ingredient_id: {instruction_id}")
+    delete_recipe_instruction(instruction_id)
+    return redirect(url_for('edit_instructions', recipe_id=recipe_id, instruction_id=DEFAULT_EDITOR_PAGE_INDEX))
 
 
 @app.route('/edit_nutrition/<string:recipe_id>', methods=["GET", "POST"])
@@ -830,6 +857,15 @@ def edit_nutrition(recipe_id: str = NEW_RECORD_PAGE_INDEX):
                                , nav_controls=nav_controls)
 
 
+@app.route('/delete_nutrition/<string:recipe_id>', methods=["GET"])
+def delete_nutrition(recipe_id: str):
+    nutrition_id = request.args['nutrition_id']
+    print(f"{request.method} method request for delete_nutrition called with recipe_id: {recipe_id} "
+          f"and ingredient_id: {nutrition_id}")
+    delete_recipe_nutrition_fact(nutrition_id)
+    return redirect(url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id=DEFAULT_EDITOR_PAGE_INDEX))
+
+
 @app.route('/edit_ingredient/<string:recipe_id>', methods=["GET", "POST"])
 def edit_ingredients(recipe_id: str = NEW_RECORD_PAGE_INDEX):
     if 'banner_message' in request.args:     # optional arg
@@ -837,7 +873,7 @@ def edit_ingredients(recipe_id: str = NEW_RECORD_PAGE_INDEX):
     else:
         banner_message = ' '
     ingredient_id = request.args['ingredient_id']
-    print(f"{request.method} method request for edit_nutrition called with recipe_id: {recipe_id} "
+    print(f"{request.method} method request for edit_ingredients called with recipe_id: {recipe_id} "
           f"and ingredient_id: {ingredient_id}")
     if request.method == 'POST':
         # commit those changes to the Database, if applicable overwrite recipe_id with newly generated value
@@ -866,6 +902,15 @@ def edit_ingredients(recipe_id: str = NEW_RECORD_PAGE_INDEX):
                                , nav_controls=nav_controls)
 
 
+@app.route('/delete_ingredient/<string:recipe_id>', methods=["GET"])
+def delete_ingredient(recipe_id: str):
+    ingredient_id = request.args['ingredient_id']
+    print(f"{request.method} method request for delete_ingredient called with recipe_id: {recipe_id} "
+          f"and ingredient_id: {ingredient_id}")
+    delete_recipe_ingredient(ingredient_id)
+    return redirect(url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=DEFAULT_EDITOR_PAGE_INDEX))
+
+
 @app.route('/database', methods=["GET", "POST"])
 def database():
     form = recipe_forms.DatabaseForm()
@@ -886,6 +931,7 @@ def email_recipe():
         message = "Email sent. \n Thank you for the contribution!"
     nav_controls = create_nav_controls(home_button=True)
     return render_template("email_recipe.html", message=message, form=form, nav_controls=nav_controls)
+
 
 
 # -------------------- RUN -------------------- #

@@ -44,8 +44,9 @@
                                         {{ ingredient['Units'] }}
                                         <!-- show edit buttons only if in default display mode -->
                                         {% if ingredient_id == '-1' %}
-                                            <!-- edit button -->
+                                            <!-- edit/delete buttons -->
                                             <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=ingredient['IngredientID']) }}" class="font-size-tiny centered">[Edit]</a>
+                                            <a href="{{ url_for('delete_ingredient', recipe_id=recipe_id, ingredient_id=ingredient['IngredientID']) }}" class="font-size-tiny centered">[Delete]</a>
                                         {% endif %}
                                     </div>
                                 {% endif %}
