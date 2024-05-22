@@ -48,9 +48,10 @@ def get_ingredients(recipe_id: str):
                    "JOIN CBIngredientName ON CBIngredient.IngredientNameID = CBIngredientName.IngredientNameID " \
                    "JOIN CBIngredientPrep ON CBIngredientPrep.PrepID = CBIngredient.PrepID " \
                    "JOIN CBIngredientUnit ON CBIngredientUnit.IngredientUnitID = CBIngredient.IngredientUnitID " \
-                   f"WHERE CBIngredient.RecipeID = {recipe_id} " \
-                   f"ORDER BY IngredientName"
-    return execute_query(query_string)
+                   "WHERE CBIngredient.RecipeID = ? " \
+                   "ORDER BY IngredientName"
+    query_args = (recipe_id,)
+    return execute_query(query_string, query_args)
 
 
 def get_nutrition(recipe_id: str):
@@ -60,31 +61,35 @@ def get_nutrition(recipe_id: str):
                    "FROM CBNutrition Element " \
                    "JOIN CBElementName ON CBElementName.ElementNameID = Element.ElementNameID " \
                    "JOIN CBElementUnit ON CBElementUnit.ElementUnitID = Element.ElementUnitID " \
-                   f"WHERE Element.RecipeID = {recipe_id}"
-    return execute_query(query_string)
+                   "WHERE Element.RecipeID = ?"
+    query_args = (recipe_id,)
+    return execute_query(query_string, query_args)
 
 
 def get_instructions(recipe_id: str):
     query_string = "SELECT StepNumber, StepText, InstructionID " \
                    "FROM CBInstructions " \
-                   f"WHERE RecipeID={recipe_id} " \
+                   f"WHERE RecipeID = ? " \
                    "ORDER BY RecipeID ASC, StepNumber ASC"
-    return execute_query(query_string)
+    query_args = (recipe_id,)
+    return execute_query(query_string, query_args)
 
 
 def get_recipe_header(recipe_id: str):
     query_string = "SELECT RecipeName, CookingTime, Servings, Source, CreationGMT, RecipeTypeID " \
                    "FROM CBRecipe " \
-                   f"WHERE RecipeID = {recipe_id}"
-    return execute_query(query_string)
+                   f"WHERE RecipeID = ? "
+    query_args = (recipe_id,)
+    return execute_query(query_string, query_args)
 
 
 def get_badges(recipe_id: str):
     query_string = "SELECT BadgeName, BadgeIconAddress " \
                    "FROM CBBadge " \
                    "JOIN CBRecipeBadge ON CBRecipeBadge.BadgeID = CBBadge.BadgeID " \
-                   f"WHERE RecipeID = {recipe_id}"
-    return execute_query(query_string)
+                   f"WHERE RecipeID = ? "
+    query_args = (recipe_id,)
+    return execute_query(query_string, query_args)
 
 
 def get_recent_recipes():
@@ -93,8 +98,8 @@ def get_recent_recipes():
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "ORDER BY CreationGMT DESC " \
                    "LIMIT 10"
-    results = execute_query(query_string)
-    return results
+    query_args = ()
+    return execute_query(query_string, query_args)
 
 
 def get_site_stats():
@@ -105,55 +110,60 @@ def get_site_stats():
                    "UNION SELECT 'TOTAL', COUNT(*), 0 " \
                    "FROM CBRecipe " \
                    "ORDER BY 3 DESC, 1 ASC"
-    results = execute_query(query_string)
-    return results
+    query_args = ()
+    return execute_query(query_string, query_args)
 
 
 def update_header(recipe_id: str, new_recipe_name: str, new_recipe_time: int
                   , new_recipe_servings: int, new_recipe_source: str, recipe_type_id: str):
     update_script = "UPDATE CBRecipe " \
-                    f'SET RecipeName = "{new_recipe_name}"' \
-                    f', CookingTime = {new_recipe_time}' \
-                    f', Servings = {new_recipe_servings}' \
-                    f', Source = "{new_recipe_source}" ' \
-                    f', RecipeTypeID = {recipe_type_id} ' \
-                    f'WHERE RecipeID = {recipe_id}'
-    execute_update_script(update_script)
+                    'SET RecipeName = ?' \
+                    ', CookingTime = ?' \
+                    ', Servings = ?' \
+                    ', Source = ? ' \
+                    ', RecipeTypeID = ? ' \
+                    'WHERE RecipeID = ?'
+    query_args = (new_recipe_name, new_recipe_time, new_recipe_servings, new_recipe_source, recipe_type_id, recipe_id)
+    execute_update_script(update_script, query_args)
 
     # add quick badge based on cook time, if applicable
     if int(new_recipe_time) <= QUICK_MEAL_THRESHOLD:
         badge_name = "Quick Prep"
         insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
-                        f'SELECT {recipe_id}, BadgeID ' \
+                        'SELECT ?, BadgeID ' \
                         'FROM CBBadge ' \
-                        f'WHERE BadgeName = "{badge_name}" ' \
+                        'WHERE BadgeName = ? ' \
                         'AND (SELECT Count(*) FROM CBRecipeBadge ' \
                         'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
-                        f'AND BadgeName = "{badge_name}" ' \
-                        f'WHERE RecipeID = {recipe_id}) ' \
+                        'AND BadgeName = ? ' \
+                        'WHERE RecipeID = ?) ' \
                         '= 0'
-        execute_insert_script(insert_script)
+        query_args = (recipe_id, badge_name, badge_name, recipe_id)
+        execute_insert_script(insert_script, query_args)
     elif int(new_recipe_time) > QUICK_MEAL_THRESHOLD:
         delete_script = 'DELETE FROM CBRecipeBadge ' \
-                        f'WHERE RecipeID = {recipe_id} AND BadgeID = 1'
-        execute_delete_script(delete_script)
+                        'WHERE RecipeID = ? AND BadgeID = 1'
+        query_args = (recipe_id, )
+        execute_delete_script(delete_script, query_args)
 
 
 def update_instruction(instruction_id: str, new_instruction: str):
     update_script = "UPDATE CBInstructions " \
-                    f'SET StepText = "{new_instruction}" ' \
-                    f'WHERE InstructionID = {instruction_id}'
-    execute_update_script(update_script)
+                    'SET StepText = ? ' \
+                    'WHERE InstructionID = ?'
+    query_args = (new_instruction, instruction_id)
+    execute_update_script(update_script, query_args)
 
 
 def update_nutrition(recipe_id: str, nutrition_id: str, new_nutrition_name_code: str, new_nutrition_value: float
                      , new_nutrition_unit_code: str):
     update_script = "UPDATE CBNutrition " \
-                    f'SET ElementNameID = "{new_nutrition_name_code}"' \
-                    f', NutritionValue = {new_nutrition_value}' \
-                    f', ElementUnitID = {new_nutrition_unit_code} ' \
-                    f'WHERE NutritionID = {nutrition_id}'
-    execute_update_script(update_script)
+                    'SET ElementNameID = ?' \
+                    ', NutritionValue = ?' \
+                    ', ElementUnitID = ? ' \
+                    'WHERE NutritionID = ?'
+    query_args = (new_nutrition_name_code, new_nutrition_value, new_nutrition_unit_code, nutrition_id)
+    execute_update_script(update_script, query_args)
 
     # process changes to badges
     if new_nutrition_name_code == '9':  # saturated fat
@@ -161,69 +171,77 @@ def update_nutrition(recipe_id: str, nutrition_id: str, new_nutrition_name_code:
             # add low-fat badge, if not already present
             badge_name = "Low Fat"
             insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
-                            f'SELECT {recipe_id}, BadgeID ' \
+                            'SELECT ?, BadgeID ' \
                             'FROM CBBadge ' \
-                            f'WHERE BadgeName = "{badge_name}" ' \
+                            'WHERE BadgeName = ? ' \
                             'AND (SELECT Count(*) FROM CBRecipeBadge ' \
                             'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
-                            f'AND BadgeName = "{badge_name}" ' \
-                            f'WHERE RecipeID = {recipe_id}) ' \
+                            'AND BadgeName = ? ' \
+                            'WHERE RecipeID = ?) ' \
                             '= 0'
-            execute_insert_script(insert_script)
+            query_args = (recipe_id, badge_name, badge_name, recipe_id)
+            execute_insert_script(insert_script, query_args)
         else:   # above fat threshold
             delete_script = 'DELETE FROM CBRecipeBadge ' \
-                            f'WHERE RecipeID = {recipe_id} AND BadgeID = 3'  # low fat badge ID
-            execute_delete_script(delete_script)
+                            'WHERE RecipeID = ? AND BadgeID = 3'  # low fat badge ID
+            query_args = (recipe_id, )
+            execute_delete_script(delete_script, query_args)
     elif new_nutrition_name_code == '1':  # calories
         if float(new_nutrition_value) <= float(LOW_CAL_THRESHOLD):
             # add low-cal badge, if not already present
             badge_name = "Low Calorie"
             insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
-                            f'SELECT {recipe_id}, BadgeID ' \
+                            'SELECT ?, BadgeID ' \
                             'FROM CBBadge ' \
-                            f'WHERE BadgeName = "{badge_name}" ' \
+                            'WHERE BadgeName = ? ' \
                             'AND (SELECT Count(*) FROM CBRecipeBadge ' \
                             'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
-                            f'AND BadgeName = "{badge_name}" ' \
-                            f'WHERE RecipeID = {recipe_id}) ' \
+                            'AND BadgeName = ? ' \
+                            'WHERE RecipeID = ?) ' \
                             '= 0'
-            execute_insert_script(insert_script)
+            query_args = (recipe_id, badge_name, badge_name, recipe_id)
+            execute_insert_script(insert_script, query_args)
         else:   # above calorie threshold
             delete_script = 'DELETE FROM CBRecipeBadge ' \
-                            f'WHERE RecipeID = {recipe_id} AND BadgeID = 2'  # low cal badge ID
+                            'WHERE RecipeID = ? AND BadgeID = 2'  # low cal badge ID
+            query_args = (recipe_id, )
             execute_delete_script(delete_script)
 
 
 def update_ingredient(ingredient_id: str, new_ingredient_name_id: str, new_quantity: float
                       , new_prep_id: str, new_unit_id: str):
     update_script = "UPDATE CBIngredient " \
-                    f'SET IngredientNameID = {new_ingredient_name_id}' \
-                    f', Quantity = {new_quantity}' \
-                    f', PrepID = {new_prep_id}' \
-                    f', IngredientUnitID = {new_unit_id} ' \
-                    f'WHERE IngredientID = {ingredient_id}'
-    execute_update_script(update_script)
-    # TODO: Check if the ingredient has been changed to something that alters the vegetarian status
+                    'SET IngredientNameID = ?' \
+                    ', Quantity = ?' \
+                    ', PrepID = ?' \
+                    ', IngredientUnitID = ? ' \
+                    'WHERE IngredientID = ?'
+    query_args = (new_ingredient_name_id, new_quantity, new_prep_id, new_unit_id, ingredient_id)
+    execute_update_script(update_script, query_args)
 
 
 def create_header(new_recipe_name: str, new_recipe_time: int
                   , new_recipe_servings: int, new_recipe_source: str, new_creationGMT: str, recipe_type_id: str):
     # inserts a new record into the header table, brings back the new ID.
     insert_script = 'INSERT INTO CBRecipe(RecipeName, CookingTime, Servings, Source, CreationGMT, RecipeTypeID)' \
-                    f'SELECT "{new_recipe_name}", {new_recipe_time}, {new_recipe_servings}, "{new_recipe_source}"' \
-                    f', "{new_creationGMT}", {recipe_type_id} '
-    new_id = execute_insert_script(insert_script, table_name='CBRecipe', id_column='RecipeID')
+                    'SELECT ?, ?, ?, ?, ?, ? '
+    query_args = (new_recipe_name, new_recipe_time, new_recipe_servings
+                  , new_recipe_source, new_creationGMT, recipe_type_id)
+    new_id = execute_insert_script(insert_script, query_args=query_args
+                                   , table_name='CBRecipe', id_column='RecipeID')
 
     # now add badge based on cook time, if applicable
     if int(new_recipe_time) <= QUICK_MEAL_THRESHOLD:
         insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
-                        f'SELECT "{new_id}", 1'
-        execute_insert_script(insert_script)
+                        'SELECT ?, 1'
+        query_args = (new_id, )
+        execute_insert_script(insert_script, query_args)
 
     # assume all recipes are vegetarian off the bat. only toggle to No when an ingredient is added which is not.
     badge_id_veggie = 4
-    insert_script = f"INSERT INTO CBRecipeBadge (RecipeID, BadgeID) SELECT {new_id}, {badge_id_veggie}"
-    execute_insert_script(insert_script)
+    insert_script = "INSERT INTO CBRecipeBadge (RecipeID, BadgeID) SELECT ?, ?"
+    query_args = (new_id, badge_id_veggie)
+    execute_insert_script(insert_script, query_args)
 
     return new_id
 
@@ -232,16 +250,19 @@ def create_instruction(recipe_id: str, new_instruction: str):
     # query for max instruction step number
     query_string = "SELECT MAX(StepNumber) as MaxStep " \
                    "FROM CBInstructions " \
-                   f"WHERE RecipeID = {recipe_id}"
-    max_step = execute_query(query_string)[0]["MaxStep"]
+                   "WHERE RecipeID = ? "
+    query_args = (recipe_id, )
+    max_step = execute_query(query_string, query_args)[0]["MaxStep"]
     if max_step is None:
         max_step = 0
     # increment
     new_step_number = int(max_step) + 1
     # insert
-    insert_script = 'INSERT INTO CBInstructions(RecipeID, StepNumber, StepText)' \
-                    f'SELECT {recipe_id}, {new_step_number}, "{new_instruction}" '
-    new_id = execute_insert_script(insert_script, table_name='CBInstructions', id_column='InstructionID')
+    insert_script = 'INSERT INTO CBInstructions(RecipeID, StepNumber, StepText) ' \
+                    'SELECT ?, ?, ? '
+    query_args = (recipe_id, new_step_number, new_instruction)
+    new_id = execute_insert_script(insert_script, query_args=query_args
+                                   , table_name='CBInstructions', id_column='InstructionID')
     return new_id
 
 
@@ -249,96 +270,112 @@ def create_nutrition(recipe_id: str, new_nutrition_name_code: str, new_nutrition
                      , new_nutrition_unit_code: str):
     # inserts a new record into the header table, brings back the new ID.
     insert_script = 'INSERT INTO CBNutrition(RecipeID, ElementNameID, NutritionValue, ElementUnitID)' \
-                    f'SELECT {recipe_id}, {new_nutrition_name_code}, {new_nutrition_value}' \
-                    f', {new_nutrition_unit_code} '
-    new_id = execute_insert_script(insert_script, table_name='CBNutrition', id_column='NutritionID')
+                    'SELECT ?, ?, ?, ? '
+    query_args = (recipe_id, new_nutrition_name_code, new_nutrition_value, new_nutrition_unit_code)
+    new_id = execute_insert_script(insert_script, query_args=query_args
+                                   , table_name='CBNutrition', id_column='NutritionID')
     # check if this new element deserves a badge
     if new_nutrition_name_code == '9':  # sat fat
         if float(new_nutrition_value) <= float(LOW_FAT_MEAL_THRESHOLD):
             # add low-fat badge, if not already present
             badge_name = "Low Fat"
             insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
-                            f'SELECT {recipe_id}, BadgeID ' \
+                            'SELECT ?, BadgeID ' \
                             'FROM CBBadge ' \
-                            f'WHERE BadgeName = "{badge_name}" ' \
+                            'WHERE BadgeName = ? ' \
                             'AND (SELECT Count(*) FROM CBRecipeBadge ' \
                             'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
-                            f'AND BadgeName = "{badge_name}" ' \
-                            f'WHERE RecipeID = {recipe_id}) ' \
+                            'AND BadgeName = ? ' \
+                            'WHERE RecipeID = ?) ' \
                             '= 0'
-            execute_insert_script(insert_script)
+            query_args = (recipe_id, badge_name, badge_name, recipe_id)
+            execute_insert_script(insert_script, query_args)
     elif new_nutrition_name_code == '1':  # calories
         if float(new_nutrition_value) <= float(LOW_CAL_THRESHOLD):
             # add low-cal badge, if not already present
             badge_name = "Low Calorie"
             insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
-                            f'SELECT {recipe_id}, BadgeID ' \
+                            'SELECT, BadgeID ' \
                             'FROM CBBadge ' \
-                            f'WHERE BadgeName = "{badge_name}" ' \
+                            'WHERE BadgeName = ? ' \
                             'AND (SELECT Count(*) FROM CBRecipeBadge ' \
                             'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
-                            f'AND BadgeName = "{badge_name}" ' \
-                            f'WHERE RecipeID = {recipe_id}) ' \
+                            'AND BadgeName = ? ' \
+                            'WHERE RecipeID = ?) ' \
                             '= 0'
-            execute_insert_script(insert_script)
+            query_args = (recipe_id, badge_name, badge_name, recipe_id)
+            execute_insert_script(insert_script, query_args)
     return new_id
 
 
 def create_ingredient_name(ingredient_name: str, is_vegetarian: str, search_name: str, linked_recipe: int):
     insert_script = 'INSERT INTO CBIngredientName(IngredientName, IsVegetarian, SearchName, RecipeID) ' \
-                    f'SELECT "{ingredient_name}", "{is_vegetarian}", "{search_name}" ' \
-                    f', IIF({linked_recipe} == -1, NULL, {linked_recipe}) '
-    new_id = execute_insert_script(insert_script, table_name='CBIngredientName', id_column='IngredientNameID')
+                    'SELECT ?, ?, ? ' \
+                    ', IIF(CAST(? AS INTEGER) == -1, NULL, ?) '
+    query_args = (ingredient_name, is_vegetarian, search_name, linked_recipe, linked_recipe)
+    new_id = execute_insert_script(insert_script, query_args=query_args
+                                   , table_name='CBIngredientName', id_column='IngredientNameID')
     return new_id
 
 
 def create_ingredient_prep(ingredient_prep: str):
     insert_script = 'INSERT INTO CBIngredientPrep(ShortName, LongName) ' \
-                    f'SELECT "{ingredient_prep}", "{ingredient_prep}" '
-    new_id = execute_insert_script(insert_script, table_name='CBIngredientPrep', id_column='PrepID')
+                    'SELECT ?, ? '
+    query_args = (ingredient_prep, ingredient_prep)
+    new_id = execute_insert_script(insert_script, query_args=query_args
+                                   , table_name='CBIngredientPrep', id_column='PrepID')
     return new_id
 
 
 def create_ingredient_unit(ingredient_unit: str):
     insert_script = 'INSERT INTO CBIngredientUnit(ShortName, LongName) ' \
-                    f'SELECT "{ingredient_unit}", "{ingredient_unit}"'
-    new_id = execute_insert_script(insert_script, table_name='CBIngredientUnit', id_column='IngredientUnitID')
+                    'SELECT ?, ? '
+    query_args = (ingredient_unit, ingredient_unit)
+    new_id = execute_insert_script(insert_script, query_args=query_args
+                                   , table_name='CBIngredientUnit', id_column='IngredientUnitID')
     return new_id
 
 
 def create_ingredient(recipe_id: str, ingredient_name_id: str, quantity: str, prep_id: str, ingredient_unit_id: str):
     insert_script = 'INSERT INTO CBIngredient(RecipeID, IngredientNameID, Quantity, PrepID, IngredientUnitID) ' \
-                    f'SELECT {recipe_id}, {ingredient_name_id}, {quantity}, {prep_id}, {ingredient_unit_id} '
-    new_id = execute_insert_script(insert_script, table_name='CBIngredient', id_column='IngredientID')
+                    'SELECT ?, ?, ?, ?, ? '
+    query_args = (recipe_id, ingredient_name_id, quantity, prep_id, ingredient_unit_id)
+    new_id = execute_insert_script(insert_script, query_args=query_args
+                                   , table_name='CBIngredient', id_column='IngredientID')
 
     # check if this ingredient is vegetarian
     query_string = 'SELECT IsVegetarian ' \
                    'FROM CBIngredientName ' \
-                   f'WHERE IngredientNameID = {ingredient_name_id}'
-    is_vegetarian = execute_query(query_string)[0]['IsVegetarian']
+                   'WHERE IngredientNameID = ? '
+    query_args = (ingredient_name_id, )
+    is_vegetarian = execute_query(query_string, query_args)[0]['IsVegetarian']
 
     # assume all recipes are vegetarian off the bat. only toggle to No when an ingredient is added which is not.
     if is_vegetarian == 'N':
         badge_id_veggie = 4
-        delete_script = f"DELETE FROM CBRecipeBadge WHERE RecipeID = {recipe_id} AND BadgeID = {badge_id_veggie}"
-        execute_delete_script(delete_script)
+        delete_script = "DELETE FROM CBRecipeBadge WHERE RecipeID = ? AND BadgeID = ? "
+        query_args = (recipe_id, badge_id_veggie)
+        execute_delete_script(delete_script, query_args)
 
     return new_id
 
 
 def delete_recipe_ingredient(ingredient_id: str):
-    delete_script = f'DELETE FROM CBIngredient WHERE IngredientID = "{ingredient_id}"'
-    execute_delete_script(delete_script)
+    delete_script = 'DELETE FROM CBIngredient WHERE IngredientID = ? '
+    query_args = (ingredient_id,)
+    execute_delete_script(delete_script, query_args)
 
 
 def delete_recipe_nutrition_fact(nutrition_id: str):
-    delete_script = f'DELETE FROM CBNutrition WHERE NutritionID = "{nutrition_id}"'
-    execute_delete_script(delete_script)
+    delete_script = 'DELETE FROM CBNutrition WHERE NutritionID = ? '
+    query_args = (nutrition_id,)
+    execute_delete_script(delete_script, query_args)
 
 
 def delete_recipe_instruction(instruction_id: str):
-    delete_script = f'DELETE FROM CBInstructions WHERE InstructionID = "{instruction_id}"'
-    execute_delete_script(delete_script)
+    delete_script = 'DELETE FROM CBInstructions WHERE InstructionID = ? '
+    query_args = (instruction_id,)
+    execute_delete_script(delete_script, query_args)
 
 
 # ------------------- FORM HANDLERS --------------------- #
@@ -410,7 +447,8 @@ def configure_nutrition_form(recipe_id: str, nutrition_id: str, nutrition_facts:
                 nutrition_value = fact['NutritionValue']
                 break
         query_string = "SELECT ElementNameID, LongName FROM CBElementName ORDER BY 2 ASC"
-        nutrition_element_names = execute_query(query_string, convert_to_dict=False)
+        query_args = ()
+        nutrition_element_names = execute_query(query_string, query_args=query_args, convert_to_dict=False)
         form.nutrition_name.choices = nutrition_element_names
         form.nutrition_name.data = str(nutrition_name_code)
         form.nutrition_value.data = nutrition_value
@@ -444,20 +482,24 @@ def configure_ingredient_form(recipe_id: str, ingredient_id: str):
         form.ingredient_name_new.data = None
         form.ingredient_name.data = default_combo_value
         query_string = "SELECT IngredientNameID, IngredientName FROM CBIngredientName ORDER BY 2 ASC"
-        form.ingredient_name.choices = execute_query(query_string, convert_to_dict=False)
+        query_args = ()
+        form.ingredient_name.choices = execute_query(query_string, query_args=query_args, convert_to_dict=False)
         form.is_vegetarian.data = 'y'  # most ingredients are vegetarian, so default to yes
         form.search_name.process_data("Not Searchable")
         form.ingredient_prep_new.data = None
         form.ingredient_prep.data = default_combo_value
         query_string = "SELECT PrepID, LongName FROM CBIngredientPrep ORDER BY 2 ASC"
-        form.ingredient_prep.choices = execute_query(query_string, convert_to_dict=False)
+        query_args = ()
+        form.ingredient_prep.choices = execute_query(query_string, query_args=query_args, convert_to_dict=False)
         form.ingredient_prep.process_data(1)    # default value which corresponds to 'None'
         form.ingredient_unit_new.data = None
         form.ingredient_unit.data = default_combo_value
         query_string = "SELECT IngredientUnitID, LongName FROM CBIngredientUnit ORDER BY 2 ASC"
-        form.ingredient_unit.choices = execute_query(query_string, convert_to_dict=False)
+        query_args = ()
+        form.ingredient_unit.choices = execute_query(query_string, query_args=query_args, convert_to_dict=False)
         query_string = "SELECT -1, '' UNION SELECT RecipeID, RecipeName FROM CBRecipe ORDER BY 2 ASC"
-        form.linked_recipe.choices = execute_query(query_string, convert_to_dict=False)
+        query_args = ()
+        form.linked_recipe.choices = execute_query(query_string, query_args=query_args, convert_to_dict=False)
 
         form.ingredient_quantity.data = default_quantity
 
@@ -466,21 +508,25 @@ def configure_ingredient_form(recipe_id: str, ingredient_id: str):
         # get the current data associated with this ID
         query_string = "SELECT IngredientNameID, IngredientUnitID, PrepID, Quantity " \
                 "FROM CBIngredient " \
-                f"WHERE IngredientID = {ingredient_id}"
-        ingredient_data = execute_query(query_string)
+                "WHERE IngredientID = ? "
+        query_args = (ingredient_id, )
+        ingredient_data = execute_query(query_string, query_args)
         form.ingredient_name_new.data = None
         query_string = "SELECT IngredientNameID, IngredientName FROM CBIngredientName ORDER BY 2 ASC"
-        form.ingredient_name.choices = execute_query(query_string, convert_to_dict=False)
+        query_args = ()
+        form.ingredient_name.choices = execute_query(query_string, query_args=query_args, convert_to_dict=False)
         form.ingredient_name.process_data(int(ingredient_data[0]["IngredientNameID"]))
 
         form.ingredient_prep_new.data = None
         query_string = "SELECT PrepID, LongName FROM CBIngredientPrep ORDER BY 2 ASC"
-        form.ingredient_prep.choices = execute_query(query_string, convert_to_dict=False)
+        query_args = ()
+        form.ingredient_prep.choices = execute_query(query_string, query_args=query_args, convert_to_dict=False)
         form.ingredient_prep.process_data(int(ingredient_data[0]["PrepID"]))
 
         form.ingredient_unit_new.data = None
         query_string = "SELECT IngredientUnitID, LongName FROM CBIngredientUnit ORDER BY 2 ASC"
-        form.ingredient_unit.choices = execute_query(query_string, convert_to_dict=False)
+        query_args = ()
+        form.ingredient_unit.choices = execute_query(query_string, query_args=query_args, convert_to_dict=False)
         form.ingredient_unit.process_data(int(ingredient_data[0]["IngredientUnitID"]))
 
         form.ingredient_quantity.data = ingredient_data[0]["Quantity"]
@@ -603,6 +649,8 @@ def process_search_form(form):
 
     # PROCESS BADGES
     badge_query_string = ""
+    query_args_optional = ()
+    query_args = ()
     if "quick_meal" in form:    # presence of a boolean field means it was checked off.
         badge_query_string += "JOIN CBRecipeBadge QuickMeal ON QuickMeal.RecipeID = CBRecipe.RecipeID " \
                               "AND QuickMeal.BadgeID = 1 "
@@ -617,10 +665,11 @@ def process_search_form(form):
                               "AND Vegetarian.BadgeID = 4 "
     recipe_type_query_string = ""
     if recipe_type != 0:
-        recipe_type_query_string = f"AND CBRecipe.RecipeTypeID = '{recipe_type}'"
+        recipe_type_query_string = "AND CBRecipe.RecipeTypeID = ? "
+        query_args_optional = (recipe_type, )
 
     query_string = "SELECT DISTINCT CBRecipe.RecipeID" \
-                   f", CASE WHEN {recipe_type} = 0 THEN CBRecipeType.ShortName || ' - ' ELSE '' END " \
+                   ", CASE WHEN ? = 0 THEN CBRecipeType.ShortName || ' - ' ELSE '' END " \
                    "|| RecipeName " \
                    "|| ' (' " \
                    "|| CAST(CookingTime AS VarChar(10)) " \
@@ -629,10 +678,10 @@ def process_search_form(form):
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "JOIN CBIngredient ON CBRecipe.RecipeID = CBIngredient.RecipeID " \
                    "JOIN CBIngredientName ON CBIngredient.IngredientNameID = CBIngredientName.IngredientNameID " \
-                   f"AND CBIngredientName.SearchName LIKE '{ingredient_search_name}' " \
-                   "" + badge_query_string + \
-                   f"WHERE RecipeName LIKE '{search_keyword}' " + recipe_type_query_string + " ORDER BY 2"
-    search_results = execute_query(query_string)
+                   "AND CBIngredientName.SearchName LIKE ? " + badge_query_string + \
+                   "WHERE RecipeName LIKE ? " + recipe_type_query_string + " ORDER BY 2"
+    query_args = (recipe_type, ingredient_search_name, search_keyword) + query_args_optional
+    search_results = execute_query(query_string, query_args)
     return search_results
 
 
@@ -931,7 +980,6 @@ def email_recipe():
         message = "Email sent. \n Thank you for the contribution!"
     nav_controls = create_nav_controls(home_button=True)
     return render_template("email_recipe.html", message=message, form=form, nav_controls=nav_controls)
-
 
 
 # -------------------- RUN -------------------- #

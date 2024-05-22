@@ -2,12 +2,12 @@ import sqlite3
 
 
 # -------------------- DB METHODS -------------------- #
-def execute_query(query_string: str, convert_to_dict=True):
+def execute_query(query_string: str, query_args=(), convert_to_dict=True):
     print('QUERY:   ' + query_string)
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
-            result = db_cursor.execute(query_string).fetchall()
+            result = db_cursor.execute(query_string, query_args).fetchall()
             if convert_to_dict:
                 # convert the resulting List to a Dict and return it to the caller
                 columns = [desc[0] for desc in db_cursor.description]
@@ -26,23 +26,23 @@ def execute_query(query_string: str, convert_to_dict=True):
         return e.args[0]
 
 
-def execute_update_script(script_string: str):
+def execute_update_script(script_string: str, query_args=()):
     print('UPDATE SCRIPT:   ' + script_string)
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
-            db_cursor.execute(script_string)
+            db_cursor.execute(script_string, query_args)
     except sqlite3.Error as e:
         print('UPDATE SCRIPT ERROR:   ' + e.args[0])
         return e.args[0]
 
 
-def execute_insert_script(script_string: str, table_name: str = None, id_column: str = None):
+def execute_insert_script(script_string: str, query_args=(), table_name: str = None, id_column: str = None):
     print('INSERT SCRIPT:   ' + script_string)
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
-            db_cursor.execute(script_string)
+            db_cursor.execute(script_string, query_args)
 
             # if a table name was specified then, the calling code is requesting a newly generated ID to be returned
             if table_name is not None:
@@ -57,12 +57,12 @@ def execute_insert_script(script_string: str, table_name: str = None, id_column:
         return e.args[0]
 
 
-def execute_delete_script(script_string: str):
+def execute_delete_script(script_string: str, query_args=()):
     print('DELETE SCRIPT:   ' + script_string)
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
-            db_cursor.execute(script_string)
+            db_cursor.execute(script_string, query_args)
     except sqlite3.Error as e:
         print('DELETE SCRIPT ERROR:   ' + e.args[0])
         return e.args[0]
