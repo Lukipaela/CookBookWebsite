@@ -23,10 +23,10 @@
                     <!-- if this ingredient is its own recipe, create a link -->
                     {% if ingredient['RelatedRecipeID']  %}
                         <a href="{{ url_for('recipe', recipe_id=ingredient['RelatedRecipeID']) }}" class="ingredient-link">
-                            <span class="JS-copy-element">{{ ingredient['IngredientName'] }}</span>
+                            <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>
                         </a>
                     {% else %}
-                        <span class="JS-copy-element">{{ ingredient['IngredientName'] }}</span>{% endif %}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }}{% endif %}
+                        <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>{% endif %}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }}{% endif %}
                 </div>
                 <!-- quantity and units -->
                 <div class="ingredient-quantity">
@@ -46,6 +46,14 @@
             <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}">[Edit Ingredients]</a>
         </div>
     {% endif %}
+    <div class="ingredient-footnotes">
+        {% for ingredient in ingredients: %}
+            {% if ingredient['FootNote'] %}
+                <div class="ingredient-footnote">* {{ ingredient['FootNote'] }}</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
 
     <!-- dividing line -->
     <hr class="separator">

@@ -461,6 +461,15 @@
     margin-bottom: 3rem;
     margin-bottom: 5rem;
 }
+.ingredient-footnotes{
+    padding-top: 2rem;
+    text-align: left;
+}
+.ingredient-footnote{
+    padding-bottom: .5rem;
+
+}
+
 
 /* INGREDIENT CHECKLIST */
 .checked-item{

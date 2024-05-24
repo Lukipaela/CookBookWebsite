@@ -43,7 +43,7 @@ nutrition_units_by_name_id = {"1": 1, "2": 2, "3": 2, "4": 3, "5": 2, "6": 2, "7
 def get_ingredients(recipe_id: str):
     query_string = "SELECT IngredientName, CBIngredientPrep.ShortName as Prep, Quantity" \
                    ", CBIngredientName.RecipeID as RelatedRecipeID " \
-                   ", CBIngredientUnit.ShortName as Units, IngredientID " \
+                   ", CBIngredientUnit.ShortName as Units, IngredientID, FootNote " \
                    "FROM CBIngredient " \
                    "JOIN CBIngredientName ON CBIngredient.IngredientNameID = CBIngredientName.IngredientNameID " \
                    "JOIN CBIngredientPrep ON CBIngredientPrep.PrepID = CBIngredient.PrepID " \
