@@ -30,11 +30,11 @@
                 </div>
                 <!-- quantity and units -->
                 <div class="ingredient-quantity">
-                    <span class="JS-ingredient-quantity JS-copy-element">
-                        {% if ingredient['Quantity'] > 0 %}
+                    {% if ingredient['Quantity'] > 0 %}
+                        <span class="JS-ingredient-quantity JS-copy-element">
                             {{ ingredient['Quantity'] }}
-                        {% endif %}
-                    </span>
+                        </span>
+                    {% endif %}
                     <span class="JS-copy-element">{{ ingredient['Units'] }}</span>
                 </div>
             </li>
