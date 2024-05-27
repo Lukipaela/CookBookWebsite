@@ -29,14 +29,14 @@
                         <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>{% endif %}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }}{% endif %}
                 </div>
                 <!-- quantity and units -->
-                <div class="ingredient-quantity">
-                    {% if ingredient['Quantity'] > 0 %}
+                {% if ingredient['Quantity'] > 0 %}
+                    <div class="ingredient-quantity">
                         <span class="JS-ingredient-quantity JS-copy-element">
                             {{ ingredient['Quantity'] }}
                         </span>
-                    {% endif %}
-                    <span class="JS-copy-element">{{ ingredient['Units'] }}</span>
-                </div>
+                        <span class="JS-copy-element">{{ ingredient['Units'] }}</span>
+                    </div>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>
@@ -117,14 +117,15 @@
             var textElements = items[i].getElementsByClassName("JS-copy-element");
             //ingredient name
             var ingredientName = textElements[0].textContent.trim();
-            copiedText += ingredientName;
+            copiedText += ingredientName.replace('*', '');
 
-            if( ingredientName != 'Salt' && ingredientName != 'Sea Salt' && ingredientName != 'Black Pepper'){
+            if( ingredientName != 'Salt' && ingredientName != 'Sea Salt' && ingredientName != 'Black Pepper' & textElements.length > 1){
                 //ingredient quantity
                 copiedText += ' - ' + textElements[1].textContent.trim() + ' ';
-
-                //ingredient units
-                copiedText += textElements[2].textContent.trim();
+                if(textElements.length > 2){
+                    //ingredient units
+                    copiedText += textElements[2].textContent.trim();
+                }
             }
            copiedText += '\n';
         }
