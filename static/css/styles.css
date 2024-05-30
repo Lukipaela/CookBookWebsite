@@ -182,6 +182,10 @@
     color: var(--theme-font-highlight);
     font-family: var(--font-highlight), cursive;
 }
+.font-bold{
+    font-weight: 500;
+
+}
 /* LARGE */
 @media (max-width: 550px){
     .font-size-large{
@@ -226,6 +230,7 @@
         font-size: 1rem;
     }
 }
+
 
 /* FOOTER */
 .footer{

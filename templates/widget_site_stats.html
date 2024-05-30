@@ -1,12 +1,24 @@
 <div class="widget site-stats-section theme-border">
     <div class="widget-wrapper">
-        <div class="widget-title font-highlight font-size-large">SITE STATS</div>
+        <div class="widget-title font-highlight font-size-large">
+            SITE STATS
+        </div>
 
-            {% for stat in site_stats: %}
+        {% for stat in site_stats: %}
+            {% if stat['Category'] == 'TOTAL' %}
+                <div class="site-stat font-highlight font-size-tiny">
+                     - - - - -
+                </div>
+                <div class="site-stat font-standard font-bold font-size-standard">
+                    {{ stat['Category'] }}:
+                    {{ stat['Count'] }}
+                </div>
+            {% else %}
                 <div class="site-stat font-standard font-size-standard">
                     {{ stat['Category'] }}:
                     {{ stat['Count'] }}
                 </div>
-            {% endfor %}
+            {% endif %}
+        {% endfor %}
     </div>
 </div>
