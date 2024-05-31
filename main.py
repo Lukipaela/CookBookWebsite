@@ -142,6 +142,15 @@ def get_site_stats():
     return execute_query(query_string, query_args)
 
 
+def get_next_recipe_id(recipe_id):
+    query_string = "SELECT MAX(Result) AS RecipeID FROM (" \
+                   "SELECT COALESCE(MIN(RecipeID), -1) Result FROM CBRecipe WHERE RecipeID > ? " \
+                   "UNION SELECT MIN(RecipeID) Result FROM CBRecipe)"
+    query_args = (recipe_id, )
+    next_id = execute_query(query_string, query_args)
+    return next_id[0]["RecipeID"]
+
+
 def update_header(recipe_id: str, new_recipe_name: str, new_recipe_time: int
                   , new_recipe_servings: int, new_recipe_source: str, recipe_type_id: str):
     update_script = "UPDATE CBRecipe " \
@@ -787,17 +796,21 @@ def process_email_form(form):
 
 
 # -------------------- UTILITY -------------------- #
-def create_nav_controls(home_button: bool = False, recipe_button: bool = False, recipe_id: str = "0"
-                        , edit_button: bool = False, search_button: bool = True):
+def create_nav_controls(home_button: bool = False, recipe_button: bool = False, recipe_id: int = 0
+                        , edit_button: bool = False, search_button: bool = True, next_recipe: bool = False
+                        , next_recipe_id: int = 0):
     # currently simple converts the inputs into a JSON / Dict which can be read by the nav html
     if prod_mode:
         edit_button = False  # edit button never allowed in prod mode
+        next_recipe = False
     return {
         "home": home_button
         , "edit": edit_button
         , "recipe": recipe_button
         , "recipeID": recipe_id
         , "search": search_button
+        , "next_recipe": next_recipe
+        , "next_recipe_id": next_recipe_id
     }
 
 
@@ -835,8 +848,9 @@ def recipe(recipe_id: str):
     recipe_header = get_recipe_header(recipe_id)
     badges = get_badges(recipe_id)
     tags = get_tags(recipe_id)
+    next_recipe_id = get_next_recipe_id(recipe_id)
     nav_controls = create_nav_controls(home_button=True, edit_button=True, recipe_button=False, recipe_id=recipe_id
-                                       , search_button=True)
+                                       , search_button=True, next_recipe=True, next_recipe_id=next_recipe_id)
     return render_template("recipe.html"
                            , recipe_id=recipe_id
                            , ingredients=ingredients
