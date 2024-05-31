@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+{% extends "bootstrap/base.html" %}
+<!-- specify a title to insert into the 'base' template slot named title -->
+{% block title %}
+    Edit Instructions
+{% endblock %}
+
+<!-- header data -->
+{% include "head_meta.html" %}
+
+<!-- specify html body content to insert into the 'base' template slot named content -->
+{% block content %}
+    <div class="theme-background"></div>
+    <div class="body">
+
+        <!-- Nav Bar -->
+        {% include "nav_buttons.html" %}
+
+        <div class="tags-page font-standard font-size-standard">
+            <div class="page-section-title">- Edit Tags -</div>
+            <div class="font-size-standard font-highlight editor-section-message">{{ banner_message }}</div>
+            {% if tags | length > 0  or nav_controls['edit'] == True %}
+                <!-- tags list -->
+                <div class="recipe-tags-section">
+                    {% for tag in tags: %}
+                        <div class="recipe-tag-element">
+                            <div class="font-size-small">
+                                {{ tag['TagName'] }}
+                            </div>
+                            {% if nav_controls['edit'] == True %}
+                                <div class="font-size-tiny centered delete-tag-button">
+                                    <a href="{{ url_for('delete_tag', recipe_id=recipe_id, tag_id=tag['TagID']) }}">X</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- new tag form -->
+
+            <form method="POST" action="{{ url_for('edit_tags', recipe_id=recipe_id) }}" novalidate>
+
+                <div class="tag-editor-section">
+                    <!-- Name Combo -->
+                    <div class="flex-parent-horizontal">
+                        <div class="tag-field-label">
+                            {{ form.tag_name.label }}
+                        </div>
+                        <!-- combo and NEW button -->
+                        <div class="JS-tag-combo">
+                            {{ form.tag_name(class="combo-wide ingredient-entry-field") }}
+                        </div>
+                        <div class="JS-tag-combo">
+                            <div class="nav-button font-standard">
+                                <a class="btn btn-success" role="button" onclick="newTagNameClicked()">New</a>
+                            </div>
+                        </div>
+                        <!-- new ingredient name record fields -->
+                        <div class="JS-tag-text JS-default-hidden">
+                            {{ form.tag_name_new(class="combo-wide ingredient-entry-field") }}
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden-fields">
+                    {{ form.recipe_id(class="hidden-fields") }}
+                </div>
+                <a class="nav-button">{{ form.submit(class="btn btn-warning submit-button font-standard") }}</a>
+            </form>
+
+        </div>
+    </div>
+
+
+    <script>
+        function newTagNameClicked(){
+            var tagNameComboFields = document.getElementsByClassName("JS-tag-combo");
+            var tagNameTextField = document.getElementsByClassName("JS-tag-text")[0];
+            // Hide combo field and button, show text field
+            tagNameComboFields[0].style.display = "none";
+            tagNameComboFields[1].style.display = "none";
+            tagNameTextField.style.display = "inline";
+        }
+    </script>
+
+{% endblock %}

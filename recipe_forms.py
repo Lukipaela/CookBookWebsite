@@ -66,12 +66,22 @@ class RecipeNutritionForm(FlaskForm):
     __nutrition_element_names = execute_query(__query_string, convert_to_dict=False)
     nutrition_name = SelectField(label="Nutrition Element", choices=__nutrition_element_names)
     nutrition_value = DecimalField(label="Amount")
-    __query_string = "SELECT ElementUnitID, LongName FROM CBElementUnit ORDER BY 2 ASC"
     # Hidden fields
     nutrition_id = StringField(label="Nutrition ID")
     recipe_id = IntegerField(label="Recipe ID")
     # submit
     submit = SubmitField(label="Save Changes")
+
+
+class RecipeTagForm(FlaskForm):
+    __query_string = "SELECT TagID, TagName FROM CBTagName ORDER BY 2 ASC"
+    __tag_names = execute_query(__query_string, convert_to_dict=False)
+    tag_name = SelectField(label="Recipe Tag", choices=__tag_names)
+    tag_name_new = StringField(label="New Tag Name", render_kw={"placeholder": "New tag"})
+    # Hidden fields
+    recipe_id = IntegerField(label="Recipe ID")
+    # submit
+    submit = SubmitField(label="Save")
 
 
 class RecipeSearchForm(FlaskForm):
@@ -81,15 +91,15 @@ class RecipeSearchForm(FlaskForm):
                      "FROM CBRecipeType " \
                      "ORDER BY 2 ASC"
     __recipe_types = execute_query(__query_string, convert_to_dict=False)
-    recipe_type = SelectField(label="Recipe Type", choices=__recipe_types)
+    recipe_type = SelectField(label="Recipe Type: ", choices=__recipe_types)
     __query_string = "SELECT DISTINCT SearchName, SearchName " \
                      "FROM CBIngredientName " \
                      "WHERE SearchName != 'Not Searchable' " \
                      "ORDER BY 2 ASC"
     __recipe_ingredients = execute_query(__query_string, convert_to_dict=False)
     __recipe_ingredients.insert(0, ('All', "All"))  # wildcard option manually added for this field
-    recipe_ingredient = SelectField(label="Ingredient", choices=__recipe_ingredients, default=0)
-    search_term = StringField(label="Title Keyword", render_kw={"placeholder": "ex: Taco"})
+    recipe_ingredient = SelectField(label="Ingredient: ", choices=__recipe_ingredients, default=0)
+    search_term = StringField(label="Search Keyword: ", render_kw={"placeholder": "ex: Taco"})
     vegetarian = BooleanField(label="Vegetarian")
     low_fat = BooleanField(label="Low Fat")
     low_calorie = BooleanField(label="Low Calorie")

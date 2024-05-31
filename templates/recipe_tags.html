@@ -1,0 +1,21 @@
+<div class="recipe-main-area font-standard font-size-standard">
+    {% if tags | length > 0  or nav_controls['edit'] == True %}
+        <div class="page-section-title">
+            Tags
+        </div>
+        <div class="recipe-tags-section">
+            {% for tag in tags: %}
+                <div class="recipe-tag-element">
+                    <div class="font-size-small">
+                        <a href="{{ url_for('search', tag_name=tag['TagName']) }}">{{ tag['TagName'] }}</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if nav_controls['edit'] == True %}
+        <div class="font-size-tiny centered">
+            <a href="{{ url_for('edit_tags', recipe_id=recipe_id) }}">[Edit Tags]</a>
+        </div>
+    {% endif %}
+</div>

@@ -12,7 +12,7 @@ import recipe_forms
 from sqlite_handlers import execute_query, execute_insert_script, execute_update_script, execute_delete_script\
     , execute_general_sql
 from recipe_forms import RecipeHeaderForm, RecipeInstructionForm, RecipeIngredientForm, RecipeNutritionForm\
-    , RecipeSearchForm
+    , RecipeSearchForm, RecipeTagForm
 import emailer
 
 
@@ -33,13 +33,23 @@ LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod
-prod_mode = True   # master toggle to switch between DEV and PROD modes
+prod_mode = False   # master toggle to switch between DEV and PROD modes
 
 # create a lookup table for ElementID by NutritionNameID
 nutrition_units_by_name_id = {"1": 1, "2": 2, "3": 2, "4": 3, "5": 2, "6": 2, "7": 2, "8": 3, "9": 2}
 
 
 # -------------------- DB METHODS -------------------- #
+def get_tags(recipe_id: int):
+    query_string = "SELECT CBTag.TagID, TagName " \
+                   "FROM CBTag " \
+                   "JOIN CBTagName ON CBTag.TagID = CBTagName.TagID " \
+                   "WHERE RecipeID = ? " \
+                   "ORDER BY TagName "
+    query_args = (recipe_id,)
+    return execute_query(query_string, query_args)
+
+
 def get_ingredients(recipe_id: str):
     query_string = "SELECT IngredientName, CBIngredientPrep.ShortName as Prep, Quantity" \
                    ", CBIngredientName.RecipeID as RelatedRecipeID " \
@@ -99,6 +109,24 @@ def get_recent_recipes():
                    "ORDER BY CreationGMT DESC " \
                    "LIMIT 10"
     query_args = ()
+    return execute_query(query_string, query_args)
+
+
+def get_recipes_by_tag(tag_name: str):
+    query_string = "SELECT DISTINCT CBRecipe.RecipeID" \
+                   ", CBRecipeType.ShortName " \
+                   "|| ' - ' " \
+                   "|| RecipeName " \
+                   "|| ' (' " \
+                   "|| CAST(CookingTime AS VarChar(10)) " \
+                   "|| 'min)' AS RecipeName " \
+                   "FROM CBRecipe " \
+                   "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
+                   "JOIN CBTag ON CBTag.RecipeID = CBRecipe.RecipeID " \
+                   "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
+                   "WHERE TagName = ? " \
+                   "ORDER BY 2 "
+    query_args = (tag_name, )
     return execute_query(query_string, query_args)
 
 
@@ -360,6 +388,23 @@ def create_ingredient(recipe_id: str, ingredient_name_id: str, quantity: str, pr
     return new_id
 
 
+def create_tag(recipe_id: int, tag_name_code: int, tag_name_new: str):
+    print(f"new tag name: {tag_name_new} has length {len(tag_name_new)}")
+    if len(tag_name_new) > 0:
+        # create new tag name
+        insert_script = 'INSERT INTO CBTagName (TagName) ' \
+                        'SELECT ? '
+        query_args = (tag_name_new, )
+        tag_name_code = execute_insert_script(insert_script, query_args=query_args
+                                              , table_name='CBTagName', id_column='TagID')
+
+    # insert a link connecting the specified tag to the specified recipe
+    insert_script = 'INSERT INTO CBTag (RecipeID, TagID) ' \
+                    'SELECT ?, ? '
+    query_args = (recipe_id, tag_name_code)
+    execute_insert_script(insert_script, query_args=query_args)
+
+
 def delete_recipe_ingredient(ingredient_id: str):
     delete_script = 'DELETE FROM CBIngredient WHERE IngredientID = ? '
     query_args = (ingredient_id,)
@@ -375,6 +420,12 @@ def delete_recipe_nutrition_fact(nutrition_id: str):
 def delete_recipe_instruction(instruction_id: str):
     delete_script = 'DELETE FROM CBInstructions WHERE InstructionID = ? '
     query_args = (instruction_id,)
+    execute_delete_script(delete_script, query_args)
+
+
+def delete_recipe_tag(recipe_id: int, tag_id: int):
+    delete_script = 'DELETE FROM CBTag WHERE RecipeID = ? AND TagID = ? '
+    query_args = (recipe_id, tag_id)
     execute_delete_script(delete_script, query_args)
 
 
@@ -457,6 +508,16 @@ def configure_nutrition_form(recipe_id: str, nutrition_id: str, nutrition_facts:
     return form
 
 
+def configure_tags_form(recipe_id: int):
+    form = RecipeTagForm()
+    form.recipe_id.data = recipe_id
+    # pull the latest list of names
+    query_string = "SELECT TagID, TagName FROM CBTagName ORDER BY 2 ASC"
+    query_args = ()
+    form.tag_name.choices = execute_query(query_string, query_args=query_args, convert_to_dict=False)
+    return form
+
+
 def configure_ingredient_form(recipe_id: str, ingredient_id: str):
     print(f"configuring ingredient form for ingredient_id: {ingredient_id}")
     form = RecipeIngredientForm()
@@ -536,7 +597,8 @@ def configure_ingredient_form(recipe_id: str, ingredient_id: str):
 
 def configure_search_form():
     form = RecipeSearchForm()
-    form.recipe_type.process_data(0)    # set default option to "all"
+    if form.recipe_type.data is None:
+        form.recipe_type.process_data(0)    # set default option to "all"
     return form
 
 
@@ -594,6 +656,16 @@ def process_nutrition_form(form):
                                         , new_nutrition_value=nutrition_value
                                         , new_nutrition_unit_code=nutrition_unit_code)
     return nutrition_id
+
+
+def process_tag_form(form):
+    print("processing tag form: ")
+    # pull data from the form
+    tag_name_code = form["tag_name"]
+    tag_name_new = form["tag_name_new"]
+    recipe_id = form["recipe_id"]
+    # add new record
+    nutrition_id = create_tag(recipe_id=recipe_id, tag_name_code=tag_name_code, tag_name_new=tag_name_new)
 
 
 def process_ingredient_form(form):
@@ -678,9 +750,12 @@ def process_search_form(form):
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "JOIN CBIngredient ON CBRecipe.RecipeID = CBIngredient.RecipeID " \
                    "JOIN CBIngredientName ON CBIngredient.IngredientNameID = CBIngredientName.IngredientNameID " \
+                   "LEFT JOIN CBTag ON CBTag.RecipeID = CBRecipe.RecipeID " \
+                   "LEFT JOIN CBTagName ON CBTag.TagID = CBTagName.TagID " \
                    "AND CBIngredientName.SearchName LIKE ? " + badge_query_string + \
-                   "WHERE RecipeName LIKE ? " + recipe_type_query_string + " ORDER BY 2"
-    query_args = (recipe_type, ingredient_search_name, search_keyword) + query_args_optional
+                   "WHERE (RecipeName LIKE ? OR TagName LIKE ? ) " \
+                   "" + recipe_type_query_string + " ORDER BY 2"
+    query_args = (recipe_type, ingredient_search_name, search_keyword, search_keyword) + query_args_optional
     search_results = execute_query(query_string, query_args)
     return search_results
 
@@ -713,7 +788,7 @@ def process_email_form(form):
 
 # -------------------- UTILITY -------------------- #
 def create_nav_controls(home_button: bool = False, recipe_button: bool = False, recipe_id: str = "0"
-                        , edit_button: bool = False):
+                        , edit_button: bool = False, search_button: bool = True):
     # currently simple converts the inputs into a JSON / Dict which can be read by the nav html
     if prod_mode:
         edit_button = False  # edit button never allowed in prod mode
@@ -722,6 +797,7 @@ def create_nav_controls(home_button: bool = False, recipe_button: bool = False, 
         , "edit": edit_button
         , "recipe": recipe_button
         , "recipeID": recipe_id
+        , "search": search_button
     }
 
 
@@ -734,40 +810,20 @@ def get_badge_definitions():
 
 
 # -------------------- APP ROUTES -------------------- #
-@app.route('/', methods=["GET", "POST"])
+@app.route('/', methods=["GET"])
 def home():
     print(f"{request.method} method request for home called")
     # get data for recent recipe widget
     site_stats = get_site_stats()
     recent_recipes = get_recent_recipes()
-    search_form = configure_search_form()
     badge_definitions = get_badge_definitions()
-    search_results = []
-    message = ""
-    if request.method == 'POST':
-        search_results = process_search_form(request.form)
-        if len(search_results) == 0:
-            message = "No recipes were found to match your search conditions."
-        elif "random" in request.form:
-            result_count = len(search_results)
-            index = randrange(result_count)
-            return redirect(url_for('recipe', recipe_id=search_results[index]["RecipeID"]))
-        return render_template("index.html"
-                               , recent_recipes=recent_recipes
-                               , site_stats=site_stats
-                               , search_form=search_form
-                               , search_results=search_results
-                               , message=message
-                               , prod_mode=prod_mode
-                               , badge_definitions=badge_definitions)
-    else:
-        return render_template("index.html"
-                               , recent_recipes=recent_recipes
-                               , site_stats=site_stats
-                               , search_form=search_form
-                               , search_results=search_results
-                               , prod_mode=prod_mode
-                               , badge_definitions=badge_definitions)
+    nav_controls = create_nav_controls(home_button=False, edit_button=False, recipe_button=False, search_button=True)
+    return render_template("index.html"
+                           , recent_recipes=recent_recipes
+                           , site_stats=site_stats
+                           , prod_mode=prod_mode
+                           , nav_controls=nav_controls
+                           , badge_definitions=badge_definitions)
 
 
 @app.route('/recipe/<string:recipe_id>', methods=["GET"])
@@ -778,7 +834,9 @@ def recipe(recipe_id: str):
     recipe_instructions = get_instructions(recipe_id)
     recipe_header = get_recipe_header(recipe_id)
     badges = get_badges(recipe_id)
-    nav_controls = create_nav_controls(home_button=True, edit_button=True, recipe_button=False, recipe_id=recipe_id)
+    tags = get_tags(recipe_id)
+    nav_controls = create_nav_controls(home_button=True, edit_button=True, recipe_button=False, recipe_id=recipe_id
+                                       , search_button=True)
     return render_template("recipe.html"
                            , recipe_id=recipe_id
                            , ingredients=ingredients
@@ -786,6 +844,7 @@ def recipe(recipe_id: str):
                            , recipe_instructions=recipe_instructions
                            , recipe_header=recipe_header
                            , badges=badges
+                           , tags=tags
                            , nav_controls=nav_controls)
 
 
@@ -814,7 +873,8 @@ def edit_header(recipe_id: str = NEW_RECORD_PAGE_INDEX):
             recipe_header = recipe_header_list[0]
         # recipe edit form
         form = configure_header_form(recipe_id, recipe_header)
-        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id)
+        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id
+                                           , search_button=True)
         return render_template("edit_header.html"
                                , recipe_id=recipe_id
                                , recipe_header=recipe_header
@@ -851,7 +911,8 @@ def edit_instructions(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         recipe_instructions = get_instructions(recipe_id)
         # recipe edit form
         form = configure_instruction_form(recipe_id, instruction_id, recipe_instructions)
-        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id)
+        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id
+                                           , search_button=True)
         return render_template("edit_instructions.html"
                                , recipe_id=recipe_id
                                , instruction_id=instruction_id
@@ -896,7 +957,8 @@ def edit_nutrition(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         nutrition_facts = get_nutrition(recipe_id)
         # recipe edit form
         form = configure_nutrition_form(recipe_id, nutrition_id, nutrition_facts)
-        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id)
+        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id
+                                           , search_button=True)
         return render_template("edit_nutrition.html"
                                , recipe_id=recipe_id
                                , nutrition_id=nutrition_id
@@ -941,7 +1003,8 @@ def edit_ingredients(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         ingredients = get_ingredients(recipe_id)
         # recipe edit form
         form = configure_ingredient_form(recipe_id, ingredient_id)
-        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id)
+        nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=True, recipe_id=recipe_id
+                                           , search_button=True)
         return render_template("edit_ingredients.html"
                                , recipe_id=recipe_id
                                , ingredient_id=ingredient_id
@@ -960,6 +1023,44 @@ def delete_ingredient(recipe_id: str):
     return redirect(url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=DEFAULT_EDITOR_PAGE_INDEX))
 
 
+@app.route('/edit_tags/<string:recipe_id>', methods=["GET", "POST"])
+def edit_tags(recipe_id: int = NEW_RECORD_PAGE_INDEX):
+    if 'banner_message' in request.args:     # optional arg
+        banner_message = request.args['banner_message']
+    else:
+        banner_message = ' '
+    print(f"{request.method} method request for edit_tags called with recipe_id: {recipe_id}")
+    if request.method == 'POST':
+        process_tag_form(request.form)
+        banner_message = 'New Tag saved!'
+        tag_id = DEFAULT_EDITOR_PAGE_INDEX   # reset ID to default after saving changes
+        # use redirect to make a GET request to the page now that data has been processed
+        return redirect(url_for('edit_tags'
+                                , recipe_id=recipe_id
+                                , banner_message=banner_message))
+    if request.method == 'GET':
+        tags = get_tags(recipe_id)
+        # recipe edit form
+        form = configure_tags_form(recipe_id)
+        nav_controls = create_nav_controls(home_button=True, edit_button=True, recipe_button=True, recipe_id=recipe_id
+                                           , search_button=True)
+        return render_template("edit_tags.html"
+                               , recipe_id=recipe_id
+                               , tags=tags
+                               , form=form
+                               , banner_message=banner_message
+                               , nav_controls=nav_controls)
+
+
+@app.route('/delete_tag/<string:recipe_id>', methods=["GET"])
+def delete_tag(recipe_id: str = NEW_RECORD_PAGE_INDEX):
+    tag_id = request.args['tag_id']
+    print(f"{request.method} method request for delete_tag called with recipe_id: {recipe_id} "
+          f"and tag_id: {tag_id}")
+    delete_recipe_tag(recipe_id, tag_id)
+    return redirect(url_for('edit_tags', recipe_id=recipe_id, tag_id=DEFAULT_EDITOR_PAGE_INDEX))
+
+
 @app.route('/database', methods=["GET", "POST"])
 def database():
     form = recipe_forms.DatabaseForm()
@@ -967,7 +1068,8 @@ def database():
     if request.method == 'POST':
         results = process_database_form(request.form)
     form["response"].data = results
-    nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=False, recipe_id=None)
+    nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=False, recipe_id=None
+                                       , search_button=True)
     return render_template("database.html", results=results, form=form, nav_controls=nav_controls)
 
 
@@ -979,7 +1081,43 @@ def email_recipe():
         process_email_form(form)
         message = "Email sent. \n Thank you for the contribution!"
     nav_controls = create_nav_controls(home_button=True)
-    return render_template("email_recipe.html", message=message, form=form, nav_controls=nav_controls)
+    return render_template("email_recipe.html", message=message, form=form, nav_controls=nav_controls
+                           , search_button=True)
+
+
+@app.route('/search', methods=["GET", "POST"])
+def search():
+    if 'tag_name' in request.args:     # optional arg
+        tag_name = request.args['tag_name']
+    else:
+        tag_name = None
+    print(f"{request.method} method request for search called with tag_name: {tag_name}")
+    search_form = configure_search_form()
+    message = ""
+    search_results = []
+    nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=False, search_button=False)
+    if request.method == 'POST':
+        search_results = process_search_form(request.form)
+        if len(search_results) == 0:
+            message = "No recipes were found to match your search conditions."
+        elif "random" in request.form:
+            # if the "pick for me" box was checked, go directly to a random recipe from the results
+            result_count = len(search_results)
+            index = randrange(result_count)
+            return redirect(url_for('recipe', recipe_id=search_results[index]["RecipeID"]))
+        return render_template("search_screen.html"
+                               , search_form=search_form
+                               , search_results=search_results
+                               , message=message
+                               , nav_controls=nav_controls)
+    else:
+        if tag_name is not None:
+            search_results = get_recipes_by_tag(tag_name)
+        return render_template("search_screen.html"
+                               , search_form=search_form
+                               , search_results=search_results
+                               , message=message
+                               , nav_controls=nav_controls)
 
 
 # -------------------- RUN -------------------- #

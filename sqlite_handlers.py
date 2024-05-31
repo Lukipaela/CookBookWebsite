@@ -4,6 +4,7 @@ import sqlite3
 # -------------------- DB METHODS -------------------- #
 def execute_query(query_string: str, query_args=(), convert_to_dict=True):
     print('QUERY:   ' + query_string)
+    print(f"args: {query_args}")
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
@@ -28,6 +29,7 @@ def execute_query(query_string: str, query_args=(), convert_to_dict=True):
 
 def execute_update_script(script_string: str, query_args=()):
     print('UPDATE SCRIPT:   ' + script_string)
+    print(f"args: {query_args}")
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
@@ -39,6 +41,7 @@ def execute_update_script(script_string: str, query_args=()):
 
 def execute_insert_script(script_string: str, query_args=(), table_name: str = None, id_column: str = None):
     print('INSERT SCRIPT:   ' + script_string)
+    print(f"args: {query_args}")
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
@@ -59,6 +62,7 @@ def execute_insert_script(script_string: str, query_args=(), table_name: str = N
 
 def execute_delete_script(script_string: str, query_args=()):
     print('DELETE SCRIPT:   ' + script_string)
+    print(f"args: {query_args}")
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()

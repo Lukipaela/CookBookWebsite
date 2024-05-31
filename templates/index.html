@@ -1,7 +1,7 @@
 {% extends "bootstrap/base.html" %}
 <!-- specify a title to insert into the 'base' template slot named title -->
 {% block title %}
-Home
+    Home
 {% endblock %}
 
 <!-- header data -->
@@ -13,23 +13,23 @@ Home
         <div class="theme-background"></div>
 
         <div class="body">
+
+            <!-- Nav Bar -->
+            {% include "nav_buttons.html" %}
+
+            <br>
+
             <h1 class="website-title font-highlight font-size-large">[RECIPE WEBSITE NAME]</h1>
 
             <div class="widgets">
                 <!--  recipe search widget -->
                 {% include "widget_site_stats.html" %}
 
-                <!--  recipe search widget -->
-                {% include "widget_search.html" %}
-
-                <!--  recipe search results widget -->
-                {% include "widget_search_results.html" %}
+                <!--  new recipe widget -->
+                {% include "widget_new_recipe.html" %}
 
                 <!-- recent recipes widget -->
                 {% include "widget_recent_recipes.html" %}
-
-                <!--  new recipe widget -->
-                {% include "widget_new_recipe.html" %}
 
                 <!-- Footer-->
                 {% include "footer.html" %}
