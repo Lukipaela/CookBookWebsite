@@ -27,6 +27,23 @@ Database Editor
             <div disabled>{{ form.response(class="text-area-entry", disabled="true") }}</div>
         </form>
 
+        <br>
+        <hr>
+        <div class="font-standard font-size-standard font-bold">Database Structure:</div>
+
+        {% for table_name, cols in database_map.items(): %}
+            <div class="font-standard">
+                <div class="font-size-small">
+                    <span class="font-bold">{{ table_name }}: </span>
+                    {% for column in cols: %}
+                        <span>{{ column["ColumnName"] }}, </span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+
+
         <!-- Footer-->
         {% include "footer.html" %}
     </div>

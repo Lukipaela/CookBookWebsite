@@ -32,7 +32,7 @@ LOW_FAT_MEAL_THRESHOLD = 5  # meals with less than this much saturated fat / ser
 LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
-# TODO set to true for prod!
+# TODO set to true for prod
 prod_mode = True   # master toggle to switch between DEV and PROD modes
 
 # create a lookup table for ElementID by NutritionNameID
@@ -149,6 +149,27 @@ def get_next_recipe_id(recipe_id):
     query_args = (recipe_id, )
     next_id = execute_query(query_string, query_args)
     return next_id[0]["RecipeID"]
+
+
+def get_database_map():
+    table_column_pairs = {}
+    query_string = "SELECT Name as TableName " \
+                   "FROM SQLite_Master " \
+                   "WHERE Type = 'table' " \
+                   "AND Name != 'sqlite_sequence' " \
+                   "ORDER BY 1"
+    query_args = ()
+    table_names = execute_query(query_string, query_args)
+    for table in table_names:
+        query_string = "SELECT Name as ColumnName " \
+                       "FROM PRAGMA_TABLE_INFO(?) " \
+                       "ORDER BY 1"
+        query_args = (table["TableName"], )
+        table_columns = execute_query(query_string, query_args)
+        print(table["TableName"])
+        table_column_pairs[table["TableName"]] = table_columns
+        print(table_column_pairs)
+    return table_column_pairs
 
 
 def update_header(recipe_id: str, new_recipe_name: str, new_recipe_time: int
@@ -1082,9 +1103,11 @@ def database():
     if request.method == 'POST':
         results = process_database_form(request.form)
     form["response"].data = results
+    database_map = get_database_map()
     nav_controls = create_nav_controls(home_button=True, edit_button=False, recipe_button=False, recipe_id=None
                                        , search_button=True)
-    return render_template("database.html", results=results, form=form, nav_controls=nav_controls)
+    return render_template("database.html", results=results, form=form, nav_controls=nav_controls
+                           , database_map=database_map)
 
 
 @app.route('/email_recipe', methods=["GET", "POST"])
