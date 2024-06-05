@@ -32,7 +32,7 @@ LOW_FAT_MEAL_THRESHOLD = 5  # meals with less than this much saturated fat / ser
 LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
-# TODO set to true for prod!!!!
+# TODO set to true for prod!!!!!
 prod_mode = True   # master toggle to switch between DEV and PROD modes
 
 # create a lookup table for ElementID by NutritionNameID
@@ -114,21 +114,45 @@ def get_recent_recipes():
 
 
 def get_recipes_by_tag(tag_name: str):
-    query_string = "SELECT DISTINCT CBRecipe.RecipeID" \
-                   ", CBRecipeType.ShortName " \
-                   "|| ' - ' " \
-                   "|| RecipeName " \
-                   "|| ' (' " \
-                   "|| CAST(CookingTime AS VarChar(10)) " \
-                   "|| 'min)' AS RecipeName " \
+    query_string = "WITH Recipes AS (" \
+                   "SELECT DISTINCT CBRecipe.RecipeID " \
                    "FROM CBRecipe " \
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "JOIN CBTag ON CBTag.RecipeID = CBRecipe.RecipeID " \
                    "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
                    "WHERE TagName = ? " \
-                   "ORDER BY 2 "
+                   "), Badges AS (" \
+                   "SELECT Recipes.RecipeID, GROUP_CONCAT(BadgeName, ', ') BadgeList " \
+                   "FROM Recipes " \
+                   "JOIN CBRecipeBadge ON CBRecipeBadge.RecipeID = Recipes.RecipeID " \
+                   "JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID " \
+                   "GROUP BY Recipes.RecipeID " \
+                   "), Tags AS (" \
+                   "SELECT Recipes.RecipeID, GROUP_CONCAT(TagName, ', ') TagList " \
+                   "FROM Recipes " \
+                   "JOIN CBTag ON CBTag.RecipeID = Recipes.RecipeID " \
+                   "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
+                   "GROUP BY Recipes.RecipeID " \
+                   ")" \
+                   "SELECT Recipes.RecipeID " \
+                   ", RecipeName " \
+                   ", PhotoURL " \
+                   ", RecipeTypeID " \
+                   ", CookingTime " \
+                   ", TagList " \
+                   ", BadgeList " \
+                   "FROM Recipes " \
+                   "JOIN CBRecipe ON CBRecipe.RecipeID = Recipes.RecipeID " \
+                   "LEFT JOIN Tags ON Tags.RecipeID = Recipes.RecipeID " \
+                   "LEFT JOIN Badges ON Badges.RecipeID = Recipes.RecipeID " \
+                   "ORDER BY 2"
     query_args = (tag_name, )
-    return execute_query(query_string, query_args)
+    search_results = execute_query(query_string, query_args)
+    for result in search_results:
+        if result["PhotoURL"] is None:
+            result["PhotoURL"] = get_default_photo_by_recipe_type(result["RecipeTypeID"])
+
+    return search_results
 
 
 def get_site_stats():
