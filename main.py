@@ -32,7 +32,7 @@ LOW_FAT_MEAL_THRESHOLD = 5  # meals with less than this much saturated fat / ser
 LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
-# TODO set to true for prod
+# TODO set to true for prod!!
 prod_mode = True   # master toggle to switch between DEV and PROD modes
 
 # create a lookup table for ElementID by NutritionNameID
@@ -86,11 +86,12 @@ def get_instructions(recipe_id: str):
 
 
 def get_recipe_header(recipe_id: str):
-    query_string = "SELECT RecipeName, CookingTime, Servings, Source, CreationGMT, RecipeTypeID " \
+    query_string = "SELECT RecipeName, CookingTime, Servings, Source, CreationGMT, RecipeTypeID, PhotoURL " \
                    "FROM CBRecipe " \
                    f"WHERE RecipeID = ? "
     query_args = (recipe_id,)
-    return execute_query(query_string, query_args)
+    header = execute_query(query_string, query_args)
+    return header
 
 
 def get_badges(recipe_id: str):
@@ -765,28 +766,53 @@ def process_search_form(form):
     if "vegetarian" in form:    # presence of a boolean field means it was checked off.
         badge_query_string += "JOIN CBRecipeBadge Vegetarian ON Vegetarian.RecipeID = CBRecipe.RecipeID " \
                               "AND Vegetarian.BadgeID = 4 "
+
     recipe_type_query_string = ""
     if recipe_type != 0:
         recipe_type_query_string = "AND CBRecipe.RecipeTypeID = ? "
         query_args_optional = (recipe_type, )
 
-    query_string = "SELECT DISTINCT CBRecipe.RecipeID" \
-                   ", CASE WHEN ? = 0 THEN CBRecipeType.ShortName || ' - ' ELSE '' END " \
-                   "|| RecipeName " \
-                   "|| ' (' " \
-                   "|| CAST(CookingTime AS VarChar(10)) " \
-                   "|| 'min)' AS RecipeName " \
+    query_string = "WITH Recipes AS (" \
+                   "SELECT DISTINCT CBRecipe.RecipeID " \
                    "FROM CBRecipe " \
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "JOIN CBIngredient ON CBRecipe.RecipeID = CBIngredient.RecipeID " \
                    "JOIN CBIngredientName ON CBIngredient.IngredientNameID = CBIngredientName.IngredientNameID " \
+                   "AND CBIngredientName.SearchName LIKE ? " + badge_query_string + \
                    "LEFT JOIN CBTag ON CBTag.RecipeID = CBRecipe.RecipeID " \
                    "LEFT JOIN CBTagName ON CBTag.TagID = CBTagName.TagID " \
-                   "AND CBIngredientName.SearchName LIKE ? " + badge_query_string + \
                    "WHERE (RecipeName LIKE ? OR TagName LIKE ? ) " \
-                   "" + recipe_type_query_string + " ORDER BY 2"
-    query_args = (recipe_type, ingredient_search_name, search_keyword, search_keyword) + query_args_optional
+                   f"{recipe_type_query_string}" \
+                   "), Badges AS (" \
+                   "SELECT Recipes.RecipeID, GROUP_CONCAT(BadgeName, ', ') BadgeList " \
+                   "FROM Recipes " \
+                   "JOIN CBRecipeBadge ON CBRecipeBadge.RecipeID = Recipes.RecipeID " \
+                   "JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID " \
+                   "GROUP BY Recipes.RecipeID " \
+                   "), Tags AS (" \
+                   "SELECT Recipes.RecipeID, GROUP_CONCAT(TagName, ', ') TagList " \
+                   "FROM Recipes " \
+                   "JOIN CBTag ON CBTag.RecipeID = Recipes.RecipeID " \
+                   "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
+                   "GROUP BY Recipes.RecipeID " \
+                   ")" \
+                   "SELECT Recipes.RecipeID " \
+                   ", RecipeName " \
+                   ", PhotoURL " \
+                   ", RecipeTypeID " \
+                   ", CookingTime " \
+                   ", TagList " \
+                   ", BadgeList " \
+                   "FROM Recipes " \
+                   "JOIN CBRecipe ON CBRecipe.RecipeID = Recipes.RecipeID " \
+                   "LEFT JOIN Tags ON Tags.RecipeID = Recipes.RecipeID " \
+                   "LEFT JOIN Badges ON Badges.RecipeID = Recipes.RecipeID " \
+                   "ORDER BY 2"
+    query_args = (ingredient_search_name, search_keyword, search_keyword) + query_args_optional
     search_results = execute_query(query_string, query_args)
+    for result in search_results:
+        if result["PhotoURL"] is None:
+            result["PhotoURL"] = get_default_photo_by_recipe_type(result["RecipeTypeID"])
     return search_results
 
 
@@ -843,6 +869,22 @@ def get_badge_definitions():
     return definitions
 
 
+def get_default_photo_by_recipe_type(recipe_type_code: int):
+    if recipe_type_code == 1:   # dinner
+        photo_location = '../static/assets/img/dinner.png'
+    elif recipe_type_code == 3:   # spice blend
+        photo_location = '../static/assets/img/spice.png'
+    elif recipe_type_code == 4:   # drink
+        photo_location = '../static/assets/img/drink.png'
+    elif recipe_type_code == 7:   # snack
+        photo_location = '../static/assets/img/snack.png'
+    elif recipe_type_code == 9:   # sauce
+        photo_location = '../static/assets/img/sauce.png'
+    else:   # other
+        photo_location = '../static/assets/img/other.png'
+    return photo_location
+
+
 # -------------------- APP ROUTES -------------------- #
 @app.route('/', methods=["GET"])
 def home():
@@ -862,11 +904,13 @@ def home():
 
 @app.route('/recipe/<string:recipe_id>', methods=["GET"])
 def recipe(recipe_id: str):
+    print(f"{request.method} method request for recipe called with recipe_id: {recipe_id}")
     ingredients = get_ingredients(recipe_id)
-    print(ingredients)
     nutrition_facts = get_nutrition(recipe_id)
     recipe_instructions = get_instructions(recipe_id)
-    recipe_header = get_recipe_header(recipe_id)
+    recipe_header = get_recipe_header(recipe_id)[0]
+    if recipe_header['PhotoURL'] is None:
+        recipe_header['PhotoURL'] = get_default_photo_by_recipe_type(recipe_header['RecipeTypeID'])
     badges = get_badges(recipe_id)
     tags = get_tags(recipe_id)
     next_recipe_id = get_next_recipe_id(recipe_id)

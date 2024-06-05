@@ -1,71 +1,95 @@
-<div class="ingredients-section font-standard font-size-standard theme-border">
+<div class="ingredients-section font-standard font-size-standard">
 
-    <div class="page-section-title"> - Ingredients - </div>
+    <!-- SIDEBAR PHOTO -->
 
-    <div class="serving-multiplier black-border">
-        Servings:
-        <span class="serving-multiplier-button">
-            <img src="../static/assets/ico/buttons/minus-icon.png" role="button" onclick="decreaseServingsClicked()">
-        </span>
-        <span class="JS-recipe-servings">{{ recipe_header[0]['Servings'] }}</span>
-        <span class="serving-multiplier-button">
-            <img src="../static/assets/ico/buttons/plus-icon.png" role="button" onclick="increaseServingsClicked()">
-        </span>
+    <div class="recipe-photo-section-sidebar font-standard font-size-standard">
+        <img src="{{ recipe_header['PhotoURL'] }}" referrerpolicy="no-referrer" alt="recipe photo" class="recipe-photo">
     </div>
 
-    <ul>
-        {% for ingredient in ingredients: %}
-            <li class="ingredient-row checklist-item"
-                         id="{{ ingredient['IngredientName'] }}"
-                         onclick="itemClicked('{{ ingredient['IngredientName'] }}')">
-                <!-- name and preparation -->
-                <div class="ingredient-name">
-                    <!-- if this ingredient is its own recipe, create a link -->
-                    {% if ingredient['RelatedRecipeID']  %}
-                        <a href="{{ url_for('recipe', recipe_id=ingredient['RelatedRecipeID']) }}" class="ingredient-link">
-                            <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>
-                        </a>
-                    {% else %}
-                        <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>{% endif %}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }}{% endif %}
+    <!-- INGREDIENT SECTION -->
+
+    <div class="theme-border">
+        <ul>
+            <!-- TITLE / MULTIPLIER -->
+
+            <li class="ingredient-row">
+                <div class="ingredient-name ingredient-list-title">
+                    Ingredients
                 </div>
-                <!-- quantity and units -->
-                {% if ingredient['Quantity'] > 0 %}
-                    <div class="ingredient-quantity">
-                        <span class="JS-ingredient-quantity JS-copy-element">
-                            {{ ingredient['Quantity'] }}
-                        </span>
-                        <span class="JS-copy-element">{{ ingredient['Units'] }}</span>
-                    </div>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-    <!-- edit button -->
-    {% if nav_controls['edit'] == True %}
-        <div class="font-size-tiny centered font-standard">
-            <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}">[Edit Ingredients]</a>
+                <div class="ingredient-quantity">
+                    <div class="serving-multiplier black-border">
+            Servings:
+            <span class="serving-multiplier-button">
+                <img src="../static/assets/ico/buttons/minus-icon.png" role="button" onclick="decreaseServingsClicked()">
+            </span>
+            <span class="JS-recipe-servings">{{ recipe_header['Servings'] }}</span>
+            <span class="serving-multiplier-button">
+                <img src="../static/assets/ico/buttons/plus-icon.png" role="button" onclick="increaseServingsClicked()">
+            </span>
         </div>
-    {% endif %}
-    <div class="ingredient-footnotes">
-        {% for ingredient in ingredients: %}
-            {% if ingredient['FootNote'] %}
-                <div class="ingredient-footnote">* {{ ingredient['FootNote'] }}</div>
-            {% endif %}
-        {% endfor %}
+                </div>
+            </li>
+
+            <!-- DIVIDING LINE -->
+
+            <hr class="separator">
+
+            <!-- INGREDIENT LIST -->
+
+            {% for ingredient in ingredients: %}
+                <li class="ingredient-row checklist-item"
+                             id="{{ ingredient['IngredientName'] }}"
+                             onclick="itemClicked('{{ ingredient['IngredientName'] }}')">
+                    <!-- name and preparation -->
+                    <div class="ingredient-name">
+                        <!-- if this ingredient is its own recipe, create a link -->
+                        {% if ingredient['RelatedRecipeID']  %}
+                            <a href="{{ url_for('recipe', recipe_id=ingredient['RelatedRecipeID']) }}" class="ingredient-link">
+                                <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>
+                            </a>
+                        {% else %}
+                            <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>{% endif %}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }}{% endif %}
+                    </div>
+                    <!-- quantity and units -->
+                    {% if ingredient['Quantity'] > 0 %}
+                        <div class="ingredient-quantity">
+                            <span class="JS-ingredient-quantity JS-copy-element">
+                                {{ ingredient['Quantity'] }}
+                            </span>
+                            <span class="JS-copy-element">{{ ingredient['Units'] }}</span>
+                        </div>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        <!-- edit button -->
+        {% if nav_controls['edit'] == True %}
+            <div class="font-size-tiny centered font-standard">
+                <a href="{{ url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=-1) }}">[Edit Ingredients]</a>
+            </div>
+        {% endif %}
+        <div class="ingredient-footnotes font-size-small">
+            {% for ingredient in ingredients: %}
+                {% if ingredient['FootNote'] %}
+                    <div class="ingredient-footnote">* {{ ingredient['FootNote'] }}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+
+        <!-- dividing line -->
+        <hr class="separator">
+
+        <!-- clipboard message -->
+        <div class="font-standard font-size-small centered checklist-note">
+            Click on items to check them off as you shop, or copy the whole list to your clipboard to easily paste into your preferred grocery list app!
+        </div>
+        <!-- copy to clipboard button -->
+        <span class="centered">
+            <div role="button" onclick="copyIngredientsToClipboard()" class="btn-warning btn">Copy to my clipboard</div>
+        </span>
+
     </div>
-
-
-    <!-- dividing line -->
-    <hr class="separator">
-
-    <!-- clipboard message -->
-    <div class="font-standard font-size-standard centered checklist-note">
-        Click on items to check them off as you shop, or copy the whole list to your clipboard to easily paste into your preferred grocery list app!
-    </div>
-    <!-- copy to clipboard button -->
-    <span class="centered">
-        <div role="button" onclick="copyIngredientsToClipboard()" class="btn-warning btn">Copy to my clipboard</div>
-    </span>
 </div>
 
 <!-- JS scripts -->
