@@ -244,13 +244,16 @@
     width: 100%;
     text-align: center;
     padding: 0 1rem;
-    text-shadow: 1px 1px 6px white;
+    background-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0px 0px 8px white;
 }
 .category-card-title{
-    padding: 0;
+
+
 }
 .category-card-data{
-    padding: 0;
+
+
 }
 
 
