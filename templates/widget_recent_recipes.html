@@ -1,15 +1,7 @@
-<div class="widget recent-recipes-section theme-border">
-    <div class="widget-wrapper">
-        <div>
-            <div class="widget-title font-highlight font-size-large">RECENTLY ADDED RECIPES</div>
+<div class="recent-recipes-section">
+    <div class="widget-title font-highlight font-size-large">RECENTLY ADDED RECIPES</div>
 
-            <div class="recent-recipes-list font-standard font-size-standard">
-                {% for recipe in recent_recipes: %}
-                    <div class="recent-recipe">
-                        <a href="{{ url_for('recipe', recipe_id=recipe['RecipeID']) }}">○ {{ recipe['RecipeName'] }}</a>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+    <!-- RESULT CARDS -->
+    {% include "recipe_cards.html" %}
+
 </div>

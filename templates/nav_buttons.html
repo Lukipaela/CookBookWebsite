@@ -23,5 +23,15 @@
             <a class="btn btn-danger" href="{{ url_for('recipe', recipe_id=nav_controls['next_recipe_id']) }}" role="button">Next Recipe</a>
         </div>
     {% endif %}
-
+    {% if prod_mode == False %}
+        <!-- dev mode, real add recipe page -->
+        <div class="nav-bar-button font-standard">
+            <a class="btn btn-success" href="{{ url_for('edit_header', recipe_id='0') }}" role="button">Add Recipe</a>
+        </div>
+    {% else %}
+        <!-- prod mode, email entry form page -->
+        <div class="nav-bar-button font-standard">
+            <a class="btn btn-success" href="{{ url_for('email_recipe') }}" role="button">Submit a recipe!</a>
+        </div>
+    {% endif %}
 </div>

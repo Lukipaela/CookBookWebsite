@@ -1,6 +1,6 @@
 <div class="recipe-main-area nutrition-facts-section font-standard font-size-standard">
     {% if nutrition_facts | length > 0  or nav_controls['edit'] == True %}
-        <div class="page-section-title">- Nutrition per Serving -</div>
+        <div class="page-section-title font-size-subtitle">- Nutrition per Serving -</div>
         {% for fact in nutrition_facts: %}
             <div class="nutrition-element black-border">
                 <div class="nutrition-value black-border font-size-small">

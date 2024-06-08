@@ -16,13 +16,13 @@
   --theme-entry-field: #444444;
 */
 
-/* B & W theme*/
+/* B & W theme
   --theme-background: #1F1F1F;
   --theme-borders: #333333;
   --theme-font-light: #AAAAAA;
   --theme-font-highlight: #CCCCCC;
   --theme-entry-field: #222222;
-
+*/
 
 /* neon theme
   --theme-background: #1D2B53;
@@ -40,19 +40,17 @@
   --theme-entry-field: #EEEEEE;
 */
 
-/* summer theme2
-  --theme-background: #B0C5A4;
-  --theme-borders: #D37676;
-  --theme-font-light: #EBC49F;
-  --theme-font-highlight: #F1EF99;
+/* summer theme2*/
+  --theme-background: #F0F0FF;
+  --theme-borders: #FEEEDD;
+  --theme-font-light: #000000;
+  --theme-font-highlight: #000000;
   --theme-entry-field: #EEEEEE;
-*/
-
 
 
 
   /* Fonts */
-  --font-highlight: "Mali";
+  --font-highlight: "Bellefair"; /*"Bellefair";*/
   --font-standard: "Kodchasan";
 
 }
@@ -130,6 +128,13 @@
 }
 
 /* BORDERS */
+.black-border-rounded{
+    border-style: solid;
+    border-width: 2px;
+    border-color: black;
+    border-radius: 2rem;
+    padding: 1.5rem;
+}
 .black-border{
     border-style: solid;
     border-width: 2px;
@@ -166,12 +171,13 @@
     border-width: 3px;
     border-color: #000000;
     border-radius: 2rem;
+    background-color: var(--theme-borders);
 }
 .recipe-card-image{
     width: 100%;
     height: 30rem;
     object-fit: cover;
-    border-radius: 2rem 2rem 0 0;
+    border-radius: 1.6rem 1.6rem 0 0;
 }
 @media (max-width: 550px){
     .recipe-card-title{
@@ -184,11 +190,11 @@
     }
 }
 .recipe-card-title{
+    padding: 0 1rem;
     border-style: solid;
     border-width: 3px 0;
     border-color: #000000;
 }
-
 @media (max-width: 550px){
     .recipe-card-data{
         height: 6rem;
@@ -198,6 +204,53 @@
     .recipe-card-data{
         height: 7.5rem;
     }
+}
+
+
+.category-cards{
+    /* outer container for search results */
+    gap: 1rem;
+}
+@media (max-width: 550px){
+    .category-card{
+        width: 100%;
+        height: 44rem;
+    }
+}
+@media (min-width: 551px){
+    .category-card{
+        width: 40rem;
+        height: 48rem;
+    }
+}
+.category-card{
+    position: relative;
+    display: inline-block;
+    border-style: solid;
+    border-width: 3px;
+    border-color: #000000;
+    border-radius: 2rem;
+    background-color: var(--theme-borders);
+}
+.category-card-image{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 1.6rem;
+}
+.category-card-label{
+    position: absolute;
+    top: 80%;
+    width: 100%;
+    text-align: center;
+    padding: 0 1rem;
+    text-shadow: 1px 1px 6px white;
+}
+.category-card-title{
+    padding: 0;
+}
+.category-card-data{
+    padding: 0;
 }
 
 
@@ -255,7 +308,6 @@
     font-weight: 500;
 
 }
-
 /* LARGE */
 @media (max-width: 550px){
     .font-size-large{
@@ -265,6 +317,17 @@
 @media (min-width: 551px){
     .font-size-large{
         font-size: 3.5rem;
+    }
+}
+/* SUBTITLE */
+@media (max-width: 550px){
+    .font-size-subtitle{
+        font-size: 2rem;
+    }
+}
+@media (min-width: 551px){
+    .font-size-subtitle{
+        font-size: 3rem;
     }
 }
 /* STANDARD */
@@ -452,41 +515,6 @@
     flex-wrap: wrap;
 }
 
-/* PHOTO */
-.recipe-photo{
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    max-height: 50rem;
-    border-style: solid;
-    border-width: 3px;
-    border-color: #000000;
-    border-radius: 2rem;
-    object-fit: cover;
-}
-@media (min-width: 1100px){
-    .recipe-photo-section-mobile{
-        display: none;
-    }
-    .recipe-photo-section-sidebar{
-        /* in full screen mode, use left/right layout, hardcoded to certain percentages of the screen */
-        width: 100%;
-        display: inline-block;
-    }
-}
-@media (max-width: 1100px){
-    .recipe-photo-section-mobile{
-        display: inline-block;
-    }
-    .recipe-photo-section-sidebar{
-        /* small mode, hide this version */
-        display: none;
-    }
-}
-.recipe-photo-section-sidebar{
-    text-align: center;
-    padding-bottom: 1rem;
-}
-
 /* INGREDIENTS */
 @media (min-width: 1100px){
     .ingredients-section{
@@ -506,6 +534,10 @@
 .ingredients-section{
     text-align: center;
     display: inline-block;
+}
+.ingredients-section-colored-zone{
+    background-color: var(--theme-borders);
+
 }
 .ingredients-section ul {
     width: 100%;
@@ -589,10 +621,6 @@
 }
 .ingredient-footnote{
     padding-bottom: .5rem;
-
-}
-.ingredient-list-title{
-    font-weight: 500;
 
 }
 
@@ -715,6 +743,40 @@
     width: 35rem;
 }
 
+/* PHOTO */
+.recipe-photo{
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-height: 50rem;
+    border-style: solid;
+    border-width: 3px;
+    border-color: #000000;
+    border-radius: 2rem;
+    object-fit: cover;
+}
+@media (min-width: 1100px){
+    .recipe-photo-section-mobile{
+        display: none;
+    }
+    .recipe-photo-section-sidebar{
+        /* in full screen mode, use left/right layout, hardcoded to certain percentages of the screen */
+        width: 100%;
+    }
+}
+@media (max-width: 1100px){
+    .recipe-photo-section-mobile{
+        display: inline-block;
+    }
+    .recipe-photo-section-sidebar{
+        /* small mode, hide this version */
+        display: none;
+    }
+}
+.recipe-photo-section-sidebar{
+    text-align: center;
+    padding-bottom: 1rem;
+}
+
 /* RECIPE PAGE */
 @media (min-width: 1100px){
     .recipe-main-area{
@@ -731,9 +793,17 @@
 
 }
 .page-section-title{
+    font-family: var(--font-highlight), serif;
     text-align: center;
     font-weight: 500;
     padding: 2rem 0;
+}
+
+/* SEPARATOR BAR */
+.separator{
+    margin: 2rem 0;
+    border-style: solid;
+    border-color: black;
 }
 
 /* Tags */
@@ -748,11 +818,11 @@
     justify-content: center;
     border-style: solid;
     border-width: 1px;
-    border-color: var(--theme-borders);
+    border-color: black;
     border-radius: 2rem;
     padding: 0rem .6rem;
     align-items: center;
-    margin: 0.1rem;
+    margin: 0.3rem;
 }
 .delete-tag-button{
         padding: 0 .3rem 0 .6rem;
@@ -771,7 +841,7 @@
 .recipe-title-section{
     text-align: center;
     display: block;
-    font-family: var(--font-highlight), cursive;
+    font-family: var(--font-highlight), serif;
     padding-bottom: 1rem;
 }
 
@@ -791,6 +861,7 @@
     display: inline-block;
     margin: 1.5rem;
     vertical-align: top;
+    text-align: center;
 }
 .widget-title{
     padding-bottom:2rem;
@@ -844,14 +915,6 @@
 ul{
     padding: 0;
     list-style-type: none;
-}
-
-.separator{
-    margin: 2rem 0;
-    border-style: solid;
-    border-color: var(--theme-borders);
-    color: var(--theme-borders);
-    background-color: var(--theme-borders);
 }
 
 html,body{

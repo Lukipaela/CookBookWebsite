@@ -1,0 +1,21 @@
+<div class="recent-recipes-section">
+    <div class="widget-title font-highlight font-size-large">BROWSE CATEGORIES</div>
+
+    <div class="recipe-cards flex-parent-horizontal">
+        {% for card in category_cards: %}
+            <div class="category-card">
+                <a  href="{{ url_for('search', category=card['CategoryName']) }}">
+                    <img src="{{ card['PhotoURL'] }}" alt="recipe photo" class="category-card-image">
+                    <div class="category-card-label">
+                        <div class="category-card-title font-size-large font-highlight font-bold">
+                            {{ card['CategoryName'] }}
+                        </div>
+                        <div class="category-card-data font-standard font-size-standard">
+                            Browse {{ card['RecipeCount'] }} choices
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>

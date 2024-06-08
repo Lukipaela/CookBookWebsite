@@ -104,55 +104,43 @@ def get_badges(recipe_id: str):
 
 
 def get_recent_recipes():
-    query_string = "SELECT LongName || ' - ' || RecipeName AS RecipeName, CreationGMT, RecipeID " \
+    query_string = "SELECT RecipeID " \
                    "FROM CBRecipe " \
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "ORDER BY CreationGMT DESC " \
-                   "LIMIT 10"
+                   "LIMIT 10 "
     query_args = ()
-    return execute_query(query_string, query_args)
+    return get_card_data(query_string, query_args)
 
 
 def get_recipes_by_tag(tag_name: str):
-    query_string = "WITH Recipes AS (" \
-                   "SELECT DISTINCT CBRecipe.RecipeID " \
+    query_string = "SELECT DISTINCT CBRecipe.RecipeID " \
                    "FROM CBRecipe " \
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "JOIN CBTag ON CBTag.RecipeID = CBRecipe.RecipeID " \
                    "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
-                   "WHERE TagName = ? " \
-                   "), Badges AS (" \
-                   "SELECT Recipes.RecipeID, GROUP_CONCAT(BadgeName, ', ') BadgeList " \
-                   "FROM Recipes " \
-                   "JOIN CBRecipeBadge ON CBRecipeBadge.RecipeID = Recipes.RecipeID " \
-                   "JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID " \
-                   "GROUP BY Recipes.RecipeID " \
-                   "), Tags AS (" \
-                   "SELECT Recipes.RecipeID, GROUP_CONCAT(TagName, ', ') TagList " \
-                   "FROM Recipes " \
-                   "JOIN CBTag ON CBTag.RecipeID = Recipes.RecipeID " \
-                   "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
-                   "GROUP BY Recipes.RecipeID " \
-                   ")" \
-                   "SELECT Recipes.RecipeID " \
-                   ", RecipeName " \
-                   ", PhotoURL " \
-                   ", RecipeTypeID " \
-                   ", CookingTime " \
-                   ", TagList " \
-                   ", BadgeList " \
-                   "FROM Recipes " \
-                   "JOIN CBRecipe ON CBRecipe.RecipeID = Recipes.RecipeID " \
-                   "LEFT JOIN Tags ON Tags.RecipeID = Recipes.RecipeID " \
-                   "LEFT JOIN Badges ON Badges.RecipeID = Recipes.RecipeID " \
-                   "ORDER BY 2"
+                   "WHERE TagName = ? "
     query_args = (tag_name, )
-    search_results = execute_query(query_string, query_args)
-    for result in search_results:
-        if result["PhotoURL"] is None:
-            result["PhotoURL"] = get_default_photo_by_recipe_type(result["RecipeTypeID"])
+    return get_card_data(query_string, query_args)
 
-    return search_results
+
+def get_recipes_by_category(category: str):
+    query_string = "SELECT RecipeID " \
+                   "FROM CBRecipe " \
+                   "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
+                   "WHERE CBRecipeType.LongName = ? "
+    query_args = (category, )
+    return get_card_data(query_string, query_args)
+
+
+def get_category_cards():
+    query_string = "SELECT CBRecipeType.LongName CategoryName, PhotoUrl, COUNT(*) RecipeCount " \
+                   "FROM CBRecipe " \
+                   "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
+                   "GROUP BY CBRecipeType.LongName " \
+                   "HAVING CreationGMT = MAX(CreationGMT) "
+    query_args = ()
+    return execute_query(query_string, query_args)
 
 
 def get_site_stats():
@@ -195,6 +183,41 @@ def get_database_map():
         table_column_pairs[table["TableName"]] = table_columns
         print(table_column_pairs)
     return table_column_pairs
+
+
+def get_card_data(recipe_id_query: str, query_args: tuple):
+    query_string = "WITH Recipes AS (" \
+                   f"{recipe_id_query}" \
+                   "), Badges AS (" \
+                   "SELECT Recipes.RecipeID, GROUP_CONCAT(BadgeName, ', ') BadgeList " \
+                   "FROM Recipes " \
+                   "JOIN CBRecipeBadge ON CBRecipeBadge.RecipeID = Recipes.RecipeID " \
+                   "JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID " \
+                   "GROUP BY Recipes.RecipeID " \
+                   "), Tags AS (" \
+                   "SELECT Recipes.RecipeID, GROUP_CONCAT(TagName, ', ') TagList " \
+                   "FROM Recipes " \
+                   "JOIN CBTag ON CBTag.RecipeID = Recipes.RecipeID " \
+                   "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
+                   "GROUP BY Recipes.RecipeID " \
+                   ")" \
+                   "SELECT Recipes.RecipeID " \
+                   ", RecipeName " \
+                   ", PhotoURL " \
+                   ", RecipeTypeID " \
+                   ", CookingTime " \
+                   ", TagList " \
+                   ", BadgeList " \
+                   "FROM Recipes " \
+                   "JOIN CBRecipe ON CBRecipe.RecipeID = Recipes.RecipeID " \
+                   "LEFT JOIN Tags ON Tags.RecipeID = Recipes.RecipeID " \
+                   "LEFT JOIN Badges ON Badges.RecipeID = Recipes.RecipeID " \
+                   "ORDER BY 2"
+    search_results = execute_query(query_string, query_args)
+    for result in search_results:
+        if result["PhotoURL"] is None:
+            result["PhotoURL"] = get_default_photo_by_recipe_type(result["RecipeTypeID"])
+    return search_results
 
 
 def update_header(recipe_id: str, new_recipe_name: str, new_recipe_time: int
@@ -796,8 +819,7 @@ def process_search_form(form):
         recipe_type_query_string = "AND CBRecipe.RecipeTypeID = ? "
         query_args_optional = (recipe_type, )
 
-    query_string = "WITH Recipes AS (" \
-                   "SELECT DISTINCT CBRecipe.RecipeID " \
+    query_string = "SELECT DISTINCT CBRecipe.RecipeID " \
                    "FROM CBRecipe " \
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "JOIN CBIngredient ON CBRecipe.RecipeID = CBIngredient.RecipeID " \
@@ -806,38 +828,9 @@ def process_search_form(form):
                    "LEFT JOIN CBTag ON CBTag.RecipeID = CBRecipe.RecipeID " \
                    "LEFT JOIN CBTagName ON CBTag.TagID = CBTagName.TagID " \
                    "WHERE (RecipeName LIKE ? OR TagName LIKE ? ) " \
-                   f"{recipe_type_query_string}" \
-                   "), Badges AS (" \
-                   "SELECT Recipes.RecipeID, GROUP_CONCAT(BadgeName, ', ') BadgeList " \
-                   "FROM Recipes " \
-                   "JOIN CBRecipeBadge ON CBRecipeBadge.RecipeID = Recipes.RecipeID " \
-                   "JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID " \
-                   "GROUP BY Recipes.RecipeID " \
-                   "), Tags AS (" \
-                   "SELECT Recipes.RecipeID, GROUP_CONCAT(TagName, ', ') TagList " \
-                   "FROM Recipes " \
-                   "JOIN CBTag ON CBTag.RecipeID = Recipes.RecipeID " \
-                   "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
-                   "GROUP BY Recipes.RecipeID " \
-                   ")" \
-                   "SELECT Recipes.RecipeID " \
-                   ", RecipeName " \
-                   ", PhotoURL " \
-                   ", RecipeTypeID " \
-                   ", CookingTime " \
-                   ", TagList " \
-                   ", BadgeList " \
-                   "FROM Recipes " \
-                   "JOIN CBRecipe ON CBRecipe.RecipeID = Recipes.RecipeID " \
-                   "LEFT JOIN Tags ON Tags.RecipeID = Recipes.RecipeID " \
-                   "LEFT JOIN Badges ON Badges.RecipeID = Recipes.RecipeID " \
-                   "ORDER BY 2"
+                   f"{recipe_type_query_string}"
     query_args = (ingredient_search_name, search_keyword, search_keyword) + query_args_optional
-    search_results = execute_query(query_string, query_args)
-    for result in search_results:
-        if result["PhotoURL"] is None:
-            result["PhotoURL"] = get_default_photo_by_recipe_type(result["RecipeTypeID"])
-    return search_results
+    return get_card_data(query_string, query_args)
 
 
 def process_database_form(form):
@@ -915,15 +908,17 @@ def home():
     print(f"{request.method} method request for home called")
     # get data for recent recipe widget
     site_stats = get_site_stats()
+    category_cards = get_category_cards()
     recent_recipes = get_recent_recipes()
     badge_definitions = get_badge_definitions()
     nav_controls = create_nav_controls(home_button=False, edit_button=False, recipe_button=False, search_button=True)
     return render_template("index.html"
-                           , recent_recipes=recent_recipes
+                           , search_results=recent_recipes
                            , site_stats=site_stats
                            , prod_mode=prod_mode
                            , nav_controls=nav_controls
-                           , badge_definitions=badge_definitions)
+                           , badge_definitions=badge_definitions
+                           , category_cards=category_cards)
 
 
 @app.route('/recipe/<string:recipe_id>', methods=["GET"])
@@ -1196,6 +1191,10 @@ def search():
         tag_name = request.args['tag_name']
     else:
         tag_name = None
+    if 'category' in request.args:     # optional arg
+        category = request.args['category']
+    else:
+        category = None
     print(f"{request.method} method request for search called with tag_name: {tag_name}")
     search_form = configure_search_form()
     message = ""
@@ -1218,11 +1217,21 @@ def search():
     else:
         if tag_name is not None:
             search_results = get_recipes_by_tag(tag_name)
+        elif category is not None:
+            search_results = get_recipes_by_category(category)
         return render_template("search_screen.html"
                                , search_form=search_form
                                , search_results=search_results
                                , message=message
                                , nav_controls=nav_controls)
+
+
+@app.route('/category_browse', methods=["GET"])
+def category_browse():
+    if 'category' in request.args:     # optional arg
+        category = request.args['category']
+    else:
+        tag_name = None
 
 
 # -------------------- RUN -------------------- #

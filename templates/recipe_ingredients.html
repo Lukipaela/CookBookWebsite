@@ -8,25 +8,25 @@
 
     <!-- INGREDIENT SECTION -->
 
-    <div class="theme-border">
+    <div class="ingredients-section-colored-zone black-border-rounded">
         <ul>
             <!-- TITLE / MULTIPLIER -->
 
             <li class="ingredient-row">
-                <div class="ingredient-name ingredient-list-title">
+                <div class="ingredient-name font-bold font-highlight font-size-subtitle">
                     Ingredients
                 </div>
                 <div class="ingredient-quantity">
-                    <div class="serving-multiplier black-border">
-            Servings:
-            <span class="serving-multiplier-button">
-                <img src="../static/assets/ico/buttons/minus-icon.png" role="button" onclick="decreaseServingsClicked()">
-            </span>
-            <span class="JS-recipe-servings">{{ recipe_header['Servings'] }}</span>
-            <span class="serving-multiplier-button">
-                <img src="../static/assets/ico/buttons/plus-icon.png" role="button" onclick="increaseServingsClicked()">
-            </span>
-        </div>
+                    <div class="serving-multiplier">
+                        Servings:
+                        <span class="serving-multiplier-button">
+                            <img src="../static/assets/ico/buttons/minus-icon.png" role="button" onclick="decreaseServingsClicked()">
+                        </span>
+                        <span class="JS-recipe-servings">{{ recipe_header['Servings'] }}</span>
+                        <span class="serving-multiplier-button">
+                            <img src="../static/assets/ico/buttons/plus-icon.png" role="button" onclick="increaseServingsClicked()">
+                        </span>
+                    </div>
                 </div>
             </li>
 

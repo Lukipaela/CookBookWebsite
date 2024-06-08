@@ -5,7 +5,7 @@
         </div>
         <div class="recipe-tags-section">
             {% for tag in tags: %}
-                <div class="recipe-tag-element">
+                <div class="recipe-tag-element font-bold">
                     <div class="font-size-small">
                         <a href="{{ url_for('search', tag_name=tag['TagName']) }}">{{ tag['TagName'] }}</a>
                     </div>
