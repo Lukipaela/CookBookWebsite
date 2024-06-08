@@ -521,6 +521,11 @@
     flex-wrap: wrap;
 }
 
+/* HOMEPAGE */
+.homepage-section{
+    padding-bottom: 7rem;
+}
+
 /* INGREDIENTS */
 @media (min-width: 1100px){
     .ingredients-section{
@@ -873,7 +878,7 @@
     text-align: center;
 }
 .widget-title{
-    padding: 3rem 0 1rem;
+    padding: 0 0 2rem;
 
 }
 .widget-wrapper{
