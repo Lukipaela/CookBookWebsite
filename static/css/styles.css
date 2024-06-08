@@ -69,7 +69,7 @@
 }
 
 .body{
-    padding: 5rem 5%;
+    padding: 2rem 5% 5rem;
     text-align:center;
     position: relative;
     background-color: var(--theme-background);
@@ -524,6 +524,7 @@
 /* HOMEPAGE */
 .homepage-section{
     padding-bottom: 7rem;
+
 }
 
 /* INGREDIENTS */
@@ -687,18 +688,25 @@
 }
 
 /* NAV BAR */
-.nav-buttons-section{
-    position: absolute;
-    display: flex;
-    left: 1.5rem;
-    top: 1rem;
+.nav-bar{
+    position: sticky;
+    top: 0;
+    left: 0;
     width: 100%;
-
+    justify-content: flex-start;
+    gap: 1.5rem;
+    padding: 1rem;
+    border-style: solid;
+    border-width: 0 0 2px;
+    border-color: black;
+    z-index: 2;
+    background-color: var(--theme-background);
 }
 .nav-bar-button{
-    padding: .2rem;
+    color: black;
 
 }
+
 
 /* NUTRITION */
 .nutrition-facts-section{

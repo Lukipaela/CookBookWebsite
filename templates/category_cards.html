@@ -1,7 +1,7 @@
 <div class="homepage-section">
     <div class="widget-title font-highlight font-size-large">BROWSE CATEGORIES</div>
 
-    <div class="recipe-cards flex-parent-horizontal">
+    <div class="flex-parent-horizontal category-cards">
         {% for card in category_cards: %}
             <div class="category-card">
                 <a  href="{{ url_for('search', category=card['CategoryName']) }}">
