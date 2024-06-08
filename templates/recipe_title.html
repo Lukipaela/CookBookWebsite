@@ -2,13 +2,15 @@
 
     <!-- TITLE INFO -->
 
-    <div class="font-size-large">{{ recipe_header['RecipeName'] }}</div>
+    <div class="font-size-large recipe-main-title">{{ recipe_header['RecipeName'] }}</div>
     <div class="font-size-standard font-standard">Cook time: {{ recipe_header['CookingTime'] }}m  |  Servings: {{ recipe_header['Servings'] }}</div>
 
     <!-- EDITOR ELEMENTS -->
 
     {% if nav_controls['edit'] == True %}
+        <br>
         <div class="font-size-standard font-standard"> ID: {{ recipe_id }}</div>
+        <br>
         <div class="font-size-tiny">
             <a href="{{ url_for('edit_header', recipe_id=recipe_id, banner_message='') }}">[Edit Title]</a>
         </div>

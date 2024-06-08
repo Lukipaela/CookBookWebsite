@@ -308,7 +308,8 @@
 }
 .font-highlight{
     color: var(--theme-font-highlight);
-    font-family: var(--font-highlight), cursive;
+    font-family: var(--font-highlight), serif;
+    line-height: 94%;
 }
 .font-bold{
     font-weight: 500;
@@ -804,7 +805,9 @@
     font-weight: 500;
     padding: 2rem 0;
 }
-
+.recipe-main-title{
+    padding: 2rem 0;
+}
 /* SEPARATOR BAR */
 .separator{
     margin: 2rem 0;

@@ -3,7 +3,7 @@
         <div class="recipe-card">
             <a  href="{{ url_for('recipe', recipe_id=recipe['RecipeID']) }}">
                 <img src="{{ recipe['PhotoURL'] }}" alt="recipe photo" class="recipe-card-image">
-                <div class="recipe-card-title font-size-standard font-highlight font-bold flex-parent-vertical">{{ recipe['RecipeName'] }}</div>
+                <div class="recipe-card-title font-size-subtitle font-highlight font-bold flex-parent-vertical">{{ recipe['RecipeName'] }}</div>
                 <div class="recipe-card-data flex-parent-vertical font-standard font-size-small">
                     <div>Cook Time: {{ recipe['CookingTime'] }}</div>
                     {% if recipe['BadgeList'] %}
