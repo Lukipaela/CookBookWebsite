@@ -205,8 +205,6 @@
         height: 7.5rem;
     }
 }
-
-
 .category-cards{
     /* outer container for search results */
     gap: 1rem;
@@ -248,7 +246,7 @@
 .category-card-label{
     display: inline-block;
     padding: 0 1rem;
-    background-color: rgba(255, 255, 255, 0.35);
+    background-color: rgba(255, 255, 255, 0.45);
     box-shadow: 0px 0px 8px white;
     border-radius: 2rem;
 }
@@ -872,7 +870,7 @@
     text-align: center;
 }
 .widget-title{
-    padding-bottom:2rem;
+    padding: 3rem 0 1rem;
 
 }
 .widget-wrapper{
