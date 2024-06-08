@@ -6,12 +6,14 @@
             <div class="category-card">
                 <a  href="{{ url_for('search', category=card['CategoryName']) }}">
                     <img src="{{ card['PhotoURL'] }}" alt="recipe photo" class="category-card-image">
-                    <div class="category-card-label">
-                        <div class="category-card-title font-size-large font-highlight font-bold">
-                            {{ card['CategoryName'] }}
-                        </div>
-                        <div class="category-card-data font-standard font-size-standard font-bold">
-                            Browse {{ card['RecipeCount'] }} choices
+                    <div class="category-card-label-wrapper">
+                        <div class="category-card-label">
+                            <div class="category-card-title font-size-large font-highlight font-bold">
+                                {{ card['CategoryName'] }}
+                            </div>
+                            <div class="category-card-data font-standard font-size-standard font-bold">
+                                Browse {{ card['RecipeCount'] }} choices
+                            </div>
                         </div>
                     </div>
                 </a>

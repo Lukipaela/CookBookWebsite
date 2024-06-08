@@ -231,6 +231,7 @@
     border-color: #000000;
     border-radius: 2rem;
     background-color: var(--theme-borders);
+    text-align: center;
 }
 .category-card-image{
     width: 100%;
@@ -238,14 +239,18 @@
     object-fit: cover;
     border-radius: 1.6rem;
 }
-.category-card-label{
+.category-card-label-wrapper{
     position: absolute;
-    top: 80%;
     width: 100%;
+    top: 80%;
     text-align: center;
+}
+.category-card-label{
+    display: inline-block;
     padding: 0 1rem;
     background-color: rgba(255, 255, 255, 0.35);
     box-shadow: 0px 0px 8px white;
+    border-radius: 2rem;
 }
 .category-card-title{
 
@@ -319,7 +324,7 @@
 }
 @media (min-width: 551px){
     .font-size-large{
-        font-size: 3.5rem;
+        font-size: 4rem;
     }
 }
 /* SUBTITLE */
