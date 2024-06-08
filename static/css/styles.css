@@ -190,6 +190,7 @@
     }
 }
 .recipe-card-title{
+    line-height: 94%;
     padding: 0 1rem;
     border-style: solid;
     border-width: 3px 0;
@@ -251,7 +252,7 @@
     border-radius: 2rem;
 }
 .category-card-title{
-
+    line-height: 94%;
 
 }
 .category-card-data{
@@ -309,7 +310,6 @@
 .font-highlight{
     color: var(--theme-font-highlight);
     font-family: var(--font-highlight), serif;
-    line-height: 94%;
 }
 .font-bold{
     font-weight: 500;
@@ -806,8 +806,9 @@
     padding: 2rem 0;
 }
 .recipe-main-title{
-    padding: 2rem 0;
+
 }
+
 /* SEPARATOR BAR */
 .separator{
     margin: 2rem 0;
