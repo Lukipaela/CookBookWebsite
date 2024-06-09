@@ -32,7 +32,7 @@ LOW_FAT_MEAL_THRESHOLD = 5  # meals with less than this much saturated fat / ser
 LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
-# TODO set to true for prod!!!!
+# TODO set to true for prod!!
 prod_mode = True   # master toggle to switch between DEV and PROD modes
 
 # create a lookup table for ElementID by NutritionNameID
@@ -221,7 +221,7 @@ def get_card_data(recipe_id_query: str, query_args: tuple):
 
 
 def update_header(recipe_id: str, new_recipe_name: str, new_recipe_time: int
-                  , new_recipe_servings: int, new_recipe_source: str, recipe_type_id: str):
+                  , new_recipe_servings: int, new_recipe_source: str, recipe_type_id: int):
     update_script = "UPDATE CBRecipe " \
                     'SET RecipeName = ?' \
                     ', CookingTime = ?' \
@@ -231,26 +231,6 @@ def update_header(recipe_id: str, new_recipe_name: str, new_recipe_time: int
                     'WHERE RecipeID = ?'
     query_args = (new_recipe_name, new_recipe_time, new_recipe_servings, new_recipe_source, recipe_type_id, recipe_id)
     execute_update_script(update_script, query_args)
-
-    # add quick badge based on cook time, if applicable
-    if int(new_recipe_time) <= QUICK_MEAL_THRESHOLD:
-        badge_name = "Quick Prep"
-        insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
-                        'SELECT ?, BadgeID ' \
-                        'FROM CBBadge ' \
-                        'WHERE BadgeName = ? ' \
-                        'AND (SELECT Count(*) FROM CBRecipeBadge ' \
-                        'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
-                        'AND BadgeName = ? ' \
-                        'WHERE RecipeID = ?) ' \
-                        '= 0'
-        query_args = (recipe_id, badge_name, badge_name, recipe_id)
-        execute_insert_script(insert_script, query_args)
-    elif int(new_recipe_time) > QUICK_MEAL_THRESHOLD:
-        delete_script = 'DELETE FROM CBRecipeBadge ' \
-                        'WHERE RecipeID = ? AND BadgeID = 1'
-        query_args = (recipe_id, )
-        execute_delete_script(delete_script, query_args)
 
 
 def update_instruction(instruction_id: str, new_instruction: str):
@@ -271,9 +251,43 @@ def update_nutrition(recipe_id: str, nutrition_id: str, new_nutrition_name_code:
     query_args = (new_nutrition_name_code, new_nutrition_value, new_nutrition_unit_code, nutrition_id)
     execute_update_script(update_script, query_args)
 
-    # process changes to badges
-    if new_nutrition_name_code == '9':  # saturated fat
-        if float(new_nutrition_value) <= float(LOW_FAT_MEAL_THRESHOLD):
+
+def update_ingredient(ingredient_id: str, new_ingredient_name_id: str, new_quantity: float
+                      , new_prep_id: str, new_unit_id: str):
+    update_script = "UPDATE CBIngredient " \
+                    'SET IngredientNameID = ?' \
+                    ', Quantity = ?' \
+                    ', PrepID = ?' \
+                    ', IngredientUnitID = ? ' \
+                    'WHERE IngredientID = ?'
+    query_args = (new_ingredient_name_id, new_quantity, new_prep_id, new_unit_id, ingredient_id)
+    execute_update_script(update_script, query_args)
+
+
+def update_badges(recipe_id: int):
+    query_string = "SELECT RecipeTypeID " \
+                   "FROM CBRecipe " \
+                   "WHERE RecipeID = ? "
+    query_args = (recipe_id,)
+    recipe_type = execute_query(query_string, query_args)[0]["RecipeTypeID"]
+    # only process badge changes on recipe types which allow it
+    if recipe_type == 3 or recipe_type == 9:
+        query_string = "SELECT CookingTime" \
+                       ", COALESCE(Max(Veg.IsVegetarian), 'Y') Vegetarian" \
+                       ", COALESCE(Calories.NutritionValue, 9000) Calories" \
+                       ", COALESCE(Fat.NutritionValue, 9000) Fat " \
+                       "FROM CBRecipe " \
+                       "LEFT JOIN CBIngredient ON CBIngredient.RecipeID = CBRecipe.RecipeID " \
+                       "LEFT JOIN CBIngredientName Veg ON Veg.IngredientNameID = CBIngredient.IngredientNameID " \
+                       "LEFT JOIN CBNutrition Calories ON Calories.RecipeID = CBRecipe.RecipeID " \
+                       "AND Calories.ElementNameID = 1 " \
+                       "LEFT JOIN CBNutrition Fat ON Fat.RecipeID = CBRecipe.RecipeID " \
+                       "AND Fat.ElementNameID = 9 " \
+                       "WHERE CBRecipe.RecipeID = ? "
+        query_args = (recipe_id,)
+        badge_stats = execute_query(query_string, query_args)[0]
+        # process changes to badges
+        if float(badge_stats["Fat"]) <= float(LOW_FAT_MEAL_THRESHOLD):
             # add low-fat badge, if not already present
             badge_name = "Low Fat"
             insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
@@ -292,8 +306,7 @@ def update_nutrition(recipe_id: str, nutrition_id: str, new_nutrition_name_code:
                             'WHERE RecipeID = ? AND BadgeID = 3'  # low fat badge ID
             query_args = (recipe_id, )
             execute_delete_script(delete_script, query_args)
-    elif new_nutrition_name_code == '1':  # calories
-        if float(new_nutrition_value) <= float(LOW_CAL_THRESHOLD):
+        if float(badge_stats["Calories"]) <= float(LOW_CAL_THRESHOLD):
             # add low-cal badge, if not already present
             badge_name = "Low Calorie"
             insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
@@ -311,19 +324,45 @@ def update_nutrition(recipe_id: str, nutrition_id: str, new_nutrition_name_code:
             delete_script = 'DELETE FROM CBRecipeBadge ' \
                             'WHERE RecipeID = ? AND BadgeID = 2'  # low cal badge ID
             query_args = (recipe_id, )
-            execute_delete_script(delete_script)
-
-
-def update_ingredient(ingredient_id: str, new_ingredient_name_id: str, new_quantity: float
-                      , new_prep_id: str, new_unit_id: str):
-    update_script = "UPDATE CBIngredient " \
-                    'SET IngredientNameID = ?' \
-                    ', Quantity = ?' \
-                    ', PrepID = ?' \
-                    ', IngredientUnitID = ? ' \
-                    'WHERE IngredientID = ?'
-    query_args = (new_ingredient_name_id, new_quantity, new_prep_id, new_unit_id, ingredient_id)
-    execute_update_script(update_script, query_args)
+            execute_delete_script(delete_script, query_args)
+        if int(badge_stats["CookingTime"]) <= QUICK_MEAL_THRESHOLD:
+            badge_name = "Quick Prep"
+            insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
+                            'SELECT ?, BadgeID ' \
+                            'FROM CBBadge ' \
+                            'WHERE BadgeName = ? ' \
+                            'AND (SELECT Count(*) FROM CBRecipeBadge ' \
+                            'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
+                            'AND BadgeName = ? ' \
+                            'WHERE RecipeID = ?) ' \
+                            '= 0'
+            query_args = (recipe_id, badge_name, badge_name, recipe_id)
+            execute_insert_script(insert_script, query_args)
+        else:
+            delete_script = 'DELETE FROM CBRecipeBadge ' \
+                            'WHERE RecipeID = ? AND BadgeID = 1'
+            query_args = (recipe_id, )
+            execute_delete_script(delete_script, query_args)
+        if badge_stats["Vegetarian"] == 'Y':
+            badge_name = "Vegetarian"
+            insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
+                            'SELECT ?, BadgeID ' \
+                            'FROM CBBadge ' \
+                            'WHERE BadgeName = ? ' \
+                            'AND (SELECT Count(*) FROM CBRecipeBadge ' \
+                            'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
+                            'AND BadgeName = ? ' \
+                            'WHERE RecipeID = ?) ' \
+                            '= 0'
+            query_args = (recipe_id, badge_name, badge_name, recipe_id)
+            execute_insert_script(insert_script, query_args)
+        else:
+            badge_id_veggie = 4
+            delete_script = "DELETE " \
+                            "FROM CBRecipeBadge " \
+                            "WHERE RecipeID = ? AND BadgeID = ? "
+            query_args = (recipe_id, badge_id_veggie)
+            execute_delete_script(delete_script, query_args)
 
 
 def create_header(new_recipe_name: str, new_recipe_time: int
@@ -380,37 +419,6 @@ def create_nutrition(recipe_id: str, new_nutrition_name_code: str, new_nutrition
     query_args = (recipe_id, new_nutrition_name_code, new_nutrition_value, new_nutrition_unit_code)
     new_id = execute_insert_script(insert_script, query_args=query_args
                                    , table_name='CBNutrition', id_column='NutritionID')
-    # check if this new element deserves a badge
-    if new_nutrition_name_code == '9':  # sat fat
-        if float(new_nutrition_value) <= float(LOW_FAT_MEAL_THRESHOLD):
-            # add low-fat badge, if not already present
-            badge_name = "Low Fat"
-            insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
-                            'SELECT ?, BadgeID ' \
-                            'FROM CBBadge ' \
-                            'WHERE BadgeName = ? ' \
-                            'AND (SELECT Count(*) FROM CBRecipeBadge ' \
-                            'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
-                            'AND BadgeName = ? ' \
-                            'WHERE RecipeID = ?) ' \
-                            '= 0'
-            query_args = (recipe_id, badge_name, badge_name, recipe_id)
-            execute_insert_script(insert_script, query_args)
-    elif new_nutrition_name_code == '1':  # calories
-        if float(new_nutrition_value) <= float(LOW_CAL_THRESHOLD):
-            # add low-cal badge, if not already present
-            badge_name = "Low Calorie"
-            insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
-                            'SELECT, BadgeID ' \
-                            'FROM CBBadge ' \
-                            'WHERE BadgeName = ? ' \
-                            'AND (SELECT Count(*) FROM CBRecipeBadge ' \
-                            'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
-                            'AND BadgeName = ? ' \
-                            'WHERE RecipeID = ?) ' \
-                            '= 0'
-            query_args = (recipe_id, badge_name, badge_name, recipe_id)
-            execute_insert_script(insert_script, query_args)
     return new_id
 
 
@@ -448,21 +456,6 @@ def create_ingredient(recipe_id: str, ingredient_name_id: str, quantity: str, pr
     query_args = (recipe_id, ingredient_name_id, quantity, prep_id, ingredient_unit_id)
     new_id = execute_insert_script(insert_script, query_args=query_args
                                    , table_name='CBIngredient', id_column='IngredientID')
-
-    # check if this ingredient is vegetarian
-    query_string = 'SELECT IsVegetarian ' \
-                   'FROM CBIngredientName ' \
-                   'WHERE IngredientNameID = ? '
-    query_args = (ingredient_name_id, )
-    is_vegetarian = execute_query(query_string, query_args)[0]['IsVegetarian']
-
-    # assume all recipes are vegetarian off the bat. only toggle to No when an ingredient is added which is not.
-    if is_vegetarian == 'N':
-        badge_id_veggie = 4
-        delete_script = "DELETE FROM CBRecipeBadge WHERE RecipeID = ? AND BadgeID = ? "
-        query_args = (recipe_id, badge_id_veggie)
-        execute_delete_script(delete_script, query_args)
-
     return new_id
 
 
@@ -922,7 +915,7 @@ def home():
 
 
 @app.route('/recipe/<string:recipe_id>', methods=["GET"])
-def recipe(recipe_id: str):
+def recipe(recipe_id: int):
     print(f"{request.method} method request for recipe called with recipe_id: {recipe_id}")
     ingredients = get_ingredients(recipe_id)
     nutrition_facts = get_nutrition(recipe_id)
@@ -962,6 +955,7 @@ def edit_header(recipe_id: str = NEW_RECORD_PAGE_INDEX):
             banner_message = 'New Recipe saved!'
         else:
             banner_message = "Change saved!"
+        update_badges(recipe_id)
         return redirect(url_for('edit_header', recipe_id=recipe_id, banner_message=banner_message))
 
     if request.method == 'GET':
@@ -1030,7 +1024,7 @@ def delete_instruction(recipe_id: str):
 
 
 @app.route('/edit_nutrition/<string:recipe_id>', methods=["GET", "POST"])
-def edit_nutrition(recipe_id: str = NEW_RECORD_PAGE_INDEX):
+def edit_nutrition(recipe_id: int = NEW_RECORD_PAGE_INDEX):
     if 'banner_message' in request.args:     # optional arg
         banner_message = request.args['banner_message']
     else:
@@ -1046,6 +1040,7 @@ def edit_nutrition(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         else:
             banner_message = "Change saved!"
         nutrition_id = DEFAULT_EDITOR_PAGE_INDEX   # reset ID to default after saving changes
+        update_badges(recipe_id)
         # redirect to new route for newly generated ID
         return redirect(url_for('edit_nutrition'
                                 , recipe_id=recipe_id
@@ -1072,6 +1067,7 @@ def delete_nutrition(recipe_id: str):
     print(f"{request.method} method request for delete_nutrition called with recipe_id: {recipe_id} "
           f"and ingredient_id: {nutrition_id}")
     delete_recipe_nutrition_fact(nutrition_id)
+    update_badges(recipe_id)
     return redirect(url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id=DEFAULT_EDITOR_PAGE_INDEX))
 
 
@@ -1092,6 +1088,7 @@ def edit_ingredients(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         else:
             banner_message = "Change saved!"
         ingredient_id = DEFAULT_EDITOR_PAGE_INDEX   # reset ID to default after saving changes
+        update_badges(recipe_id)
         # redirect to new route for newly generated ID
         return redirect(url_for('edit_ingredients'
                                 , recipe_id=recipe_id
@@ -1118,6 +1115,7 @@ def delete_ingredient(recipe_id: str):
     print(f"{request.method} method request for delete_ingredient called with recipe_id: {recipe_id} "
           f"and ingredient_id: {ingredient_id}")
     delete_recipe_ingredient(ingredient_id)
+    update_badges(recipe_id)
     return redirect(url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=DEFAULT_EDITOR_PAGE_INDEX))
 
 
@@ -1224,14 +1222,6 @@ def search():
                                , search_results=search_results
                                , message=message
                                , nav_controls=nav_controls)
-
-
-@app.route('/category_browse', methods=["GET"])
-def category_browse():
-    if 'category' in request.args:     # optional arg
-        category = request.args['category']
-    else:
-        tag_name = None
 
 
 # -------------------- RUN -------------------- #

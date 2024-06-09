@@ -1,30 +1,30 @@
 <div class="nav-bar flex-parent-horizontal">
     <!-- HOME -->
     {% if nav_controls['home'] == True %}
-        <a class="nav-bar-button font-standard" href="{{ url_for('home') }}" role="button">Home</a>
+        <a class="nav-bar-button font-standard font-bold" href="{{ url_for('home') }}" role="button">Home</a>
     {% endif %}
 
     <!-- SEARCH -->
     {% if nav_controls['search'] == True %}
-        <a class="nav-bar-button font-standard" href="{{ url_for('search') }}" role="button">Find a Recipe</a>
+        <a class="nav-bar-button font-standard font-bold" href="{{ url_for('search') }}" role="button">Find a Recipe</a>
     {% endif %}
 
     <!-- RECIPE -->
     {% if nav_controls['recipe'] == True and nav_controls['recipeID'] | int != 0 %}
-        <a class="nav-bar-button font-standard" href="{{ url_for('recipe', recipe_id=nav_controls['recipeID']) }}" role="button">Back to Recipe</a>
+        <a class="nav-bar-button font-standard font-bold" href="{{ url_for('recipe', recipe_id=nav_controls['recipeID']) }}" role="button">Back to Recipe</a>
     {% endif %}
 
     <!-- NEXT RECIPE -->
     {% if nav_controls['next_recipe'] == True %}
-        <a class="nav-bar-button font-standard" href="{{ url_for('recipe', recipe_id=nav_controls['next_recipe_id']) }}" role="button">Next Recipe</a>
+        <a class="nav-bar-button font-standard font-bold" href="{{ url_for('recipe', recipe_id=nav_controls['next_recipe_id']) }}" role="button">Next Recipe</a>
     {% endif %}
 
         <!-- SUBMIT RECIPE -->
     {% if prod_mode == False %}
         <!-- dev mode, real add recipe page -->
-        <a class="nav-bar-button font-standard" href="{{ url_for('edit_header', recipe_id='0') }}" role="button">Add Recipe</a>
+        <a class="nav-bar-button font-standard font-bold" href="{{ url_for('edit_header', recipe_id='0') }}" role="button">Add Recipe</a>
     {% else %}
         <!-- prod mode, email entry form page -->
-        <a class="nav-bar-button font-standard" href="{{ url_for('email_recipe') }}" role="button">Submit a recipe!</a>
+        <a class="nav-bar-button font-standard font-bold" href="{{ url_for('email_recipe') }}" role="button">Submit a Recipe!</a>
     {% endif %}
 </div>

@@ -40,7 +40,7 @@
   --theme-entry-field: #EEEEEE;
 */
 
-/* summer theme2*/
+/* white theme */
   --theme-background: #F0F0FF;
   --theme-borders: #FEEEDD;
   --theme-font-light: #000000;
@@ -704,7 +704,7 @@
 }
 .nav-bar-button{
     color: black;
-
+    height: 2.5rem;
 }
 
 
