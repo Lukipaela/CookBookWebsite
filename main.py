@@ -33,7 +33,7 @@ LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod!!
-prod_mode = True   # master toggle to switch between DEV and PROD modes
+prod_mode = False   # master toggle to switch between DEV and PROD modes
 
 # create a lookup table for ElementID by NutritionNameID
 nutrition_units_by_name_id = {"1": 1, "2": 2, "3": 2, "4": 3, "5": 2, "6": 2, "7": 2, "8": 3, "9": 2}
@@ -116,11 +116,20 @@ def get_recent_recipes():
 def get_recipes_by_tag(tag_name: str):
     query_string = "SELECT DISTINCT CBRecipe.RecipeID " \
                    "FROM CBRecipe " \
-                   "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
                    "JOIN CBTag ON CBTag.RecipeID = CBRecipe.RecipeID " \
                    "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
                    "WHERE TagName = ? "
     query_args = (tag_name, )
+    return get_card_data(query_string, query_args)
+
+
+def get_recipes_by_badge(badge_name: str):
+    query_string = "SELECT DISTINCT CBRecipe.RecipeID " \
+                   "FROM CBRecipe " \
+                   "JOIN CBRecipeBadge ON CBRecipeBadge.RecipeID = CBRecipe.RecipeID " \
+                   "JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID " \
+                   "WHERE BadgeName = ? "
+    query_args = (badge_name, )
     return get_card_data(query_string, query_args)
 
 
@@ -1185,6 +1194,7 @@ def email_recipe():
 
 @app.route('/search', methods=["GET", "POST"])
 def search():
+    # collect optional kw args
     if 'tag_name' in request.args:     # optional arg
         tag_name = request.args['tag_name']
     else:
@@ -1193,6 +1203,10 @@ def search():
         category = request.args['category']
     else:
         category = None
+    if 'badge_name' in request.args:     # optional arg
+        badge_name = request.args['badge_name']
+    else:
+        badge_name = None
     print(f"{request.method} method request for search called with tag_name: {tag_name}")
     search_form = configure_search_form()
     message = ""
@@ -1217,6 +1231,8 @@ def search():
             search_results = get_recipes_by_tag(tag_name)
         elif category is not None:
             search_results = get_recipes_by_category(category)
+        elif badge_name is not None:
+            search_results = get_recipes_by_badge(badge_name)
         return render_template("search_screen.html"
                                , search_form=search_form
                                , search_results=search_results
