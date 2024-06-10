@@ -1,14 +1,14 @@
 <div class="ingredients-section font-standard font-size-standard">
 
     <!-- SIDEBAR PHOTO -->
-
-    <div class="recipe-photo-section-sidebar font-standard font-size-standard">
-        <img src="{{ recipe_header['PhotoURL'] }}" alt="recipe photo" class="recipe-photo">
+    <div class="desktop-only">
+        <div class="recipe-photo-container font-standard font-size-standard">
+            <img src="{{ recipe_header['PhotoURL'] }}" alt="recipe photo" class="recipe-photo">
+        </div>
     </div>
-
     <!-- INGREDIENT SECTION -->
 
-    <div class="ingredients-section-colored-zone black-border-rounded">
+    <div class="background-secondary-color black-border-rounded">
         <ul>
             <!-- TITLE / MULTIPLIER -->
 
@@ -18,14 +18,18 @@
                 </div>
                 <div class="ingredient-quantity">
                     <div class="serving-multiplier">
-                        Servings:
-                        <span class="serving-multiplier-button">
-                            <img src="../static/assets/ico/buttons/minus-icon.png" role="button" onclick="decreaseServingsClicked()">
-                        </span>
-                        <span class="JS-recipe-servings">{{ recipe_header['Servings'] }}</span>
-                        <span class="serving-multiplier-button">
-                            <img src="../static/assets/ico/buttons/plus-icon.png" role="button" onclick="increaseServingsClicked()">
-                        </span>
+                        <div class="serving-multiplier-component">
+                            Servings:
+                        </div>
+                        <div class="serving-multiplier-component">
+                            <span class="serving-multiplier-button">
+                                <img src="../static/assets/ico/buttons/minus-icon.png" role="button" onclick="decreaseServingsClicked()">
+                            </span>
+                            <span class="JS-recipe-servings">{{ recipe_header['Servings'] }}</span>
+                            <span class="serving-multiplier-button">
+                                <img src="../static/assets/ico/buttons/plus-icon.png" role="button" onclick="increaseServingsClicked()">
+                            </span>
+                        </div>
                     </div>
                 </div>
             </li>

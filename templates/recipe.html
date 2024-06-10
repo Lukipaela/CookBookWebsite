@@ -18,22 +18,31 @@ Recipe
 
         <div class="body">
 
-            <!-- Title Content -->
+            <!-- Title -->
             {% include "recipe_title.html" %}
 
-            <!-- Recipe Photo -->
-            {% include "recipe_photo.html" %}
+            <!-- Ingredients (Desktop) -->
+            <div class="ingredient-section-desktop desktop-only">
+                {% include "recipe_ingredients.html" %}
+            </div>
 
-            <!-- Instructions Content -->
+            <!-- Recipe Photo (mobile) -->
+            <div class="mobile-only">
+                {% include "recipe_photo.html" %}
+            </div>
+
+            <!-- Nutrition Facts -->
             {% include "recipe_nutrition_facts.html" %}
 
-            <!-- page title zone -->
-            {% include "recipe_ingredients.html" %}
+            <!-- Ingredients (mobile) -->
+            <div class="ingredient-section-mobile mobile-only">
+                {% include "recipe_ingredients.html" %}
+            </div>
 
-            <!-- Instructions Content -->
+            <!-- Instructions  -->
             {% include "recipe_instructions.html" %}
 
-            <!-- Recipe Tag Content -->
+            <!-- Tags -->
             {% include "recipe_tags.html" %}
 
             <!-- Footer-->

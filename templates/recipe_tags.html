@@ -1,14 +1,15 @@
-<div class="recipe-main-area font-standard font-size-standard">
-    {% if tags | length > 0  or nav_controls['edit'] == True %}
-        <div class="page-section-title font-size-subtitle">
-            Tags
-        </div>
+<div class="recipe-main-area font-size-standard ">
+    {% if tags | length > 0 or badges | length > 0 or nav_controls['edit'] == True %}
         <div class="recipe-tags-section">
             {% for tag in tags: %}
-                <div class="recipe-tag-element font-bold">
-                    <div class="font-size-small">
-                        <a href="{{ url_for('search', tag_name=tag['TagName']) }}">{{ tag['TagName'] }}</a>
-                    </div>
+                <div class="recipe-tag-element font-size-small background-secondary-color">
+                    <a class="font-standard font-bold" href="{{ url_for('search', tag_name=tag['TagName']) }}">{{ tag['TagName'] }}</a>
+                </div>
+            {% endfor %}
+
+            {% for badge in badges: %}
+                <div class="recipe-tag-element font-size-small background-secondary-color">
+                    <a class="font-standard font-bold" href="{{ url_for('search', badge_name=badge['BadgeName']) }}">{{ badge['BadgeName'] }}</a>
                 </div>
             {% endfor %}
         </div>
