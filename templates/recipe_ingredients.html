@@ -41,9 +41,8 @@
             <!-- INGREDIENT LIST -->
 
             {% for ingredient in ingredients: %}
-                <li class="ingredient-row checklist-item"
-                             id="{{ ingredient['IngredientName'] }}"
-                             onclick="itemClicked('{{ ingredient['IngredientName'] }}')">
+                <li class="ingredient-row checklist-item {{ 'JS-ingredient-' + ingredient['IngredientName'].replace(' ', '') }}"
+                             onclick="itemClicked('{{ 'JS-ingredient-' + ingredient['IngredientName'].replace(' ', '') }}')">
                     <!-- name and preparation -->
                     <div class="ingredient-name">
                         <!-- if this ingredient is its own recipe, create a link -->
@@ -52,7 +51,7 @@
                                 <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>
                             </a>
                         {% else %}
-                            <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>{% endif %}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }}{% endif %}
+                        <span class="JS-copy-element">{{ ingredient['IngredientName'] }}{% if ingredient['FootNote'] %}*{% endif %}</span>{% endif %}{% if ingredient['Prep'] | length > 0 %}, {{ ingredient['Prep'] }}{% endif %}
                     </div>
                     <!-- quantity and units -->
                     {% if ingredient['Quantity'] > 0 %}
@@ -130,11 +129,15 @@
     }
 
     function itemClicked(itemID){
-        var clickedItem = document.getElementById(itemID);
-        if(clickedItem.classList.contains("checked-item"))
-            clickedItem.classList.remove("checked-item");
-        else
-            clickedItem.classList.add("checked-item");
+        var clickedItemArray = document.getElementsByClassName(itemID);
+        var iterations = clickedItemArray.length;
+        for (var i = 0; i < iterations; i++) {
+            var clickedItem = clickedItemArray[i];
+            if(clickedItem.classList.contains("checked-item"))
+                clickedItem.classList.remove("checked-item");
+            else
+                clickedItem.classList.add("checked-item");
+        }
     }
 
     function copyIngredientsToClipboard(){

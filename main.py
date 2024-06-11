@@ -32,7 +32,7 @@ LOW_FAT_MEAL_THRESHOLD = 5  # meals with less than this much saturated fat / ser
 LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
-# TODO set to true for prod!!
+# TODO set to true for prod!!!!
 prod_mode = True   # master toggle to switch between DEV and PROD modes
 
 # create a lookup table for ElementID by NutritionNameID
@@ -280,9 +280,9 @@ def update_badges(recipe_id: int):
     query_args = (recipe_id,)
     recipe_type = execute_query(query_string, query_args)[0]["RecipeTypeID"]
     # only process badge changes on recipe types which allow it
-    if recipe_type == 3 or recipe_type == 9:
+    if recipe_type != 3 or recipe_type != 9:
         query_string = "SELECT CookingTime" \
-                       ", COALESCE(Max(Veg.IsVegetarian), 'Y') Vegetarian" \
+                       ", COALESCE(MIN(Veg.IsVegetarian), 'Y') Vegetarian" \
                        ", COALESCE(Calories.NutritionValue, 9000) Calories" \
                        ", COALESCE(Fat.NutritionValue, 9000) Fat " \
                        "FROM CBRecipe " \
@@ -469,7 +469,6 @@ def create_ingredient(recipe_id: str, ingredient_name_id: str, quantity: str, pr
 
 
 def create_tag(recipe_id: int, tag_name_code: int, tag_name_new: str):
-    print(f"new tag name: {tag_name_new} has length {len(tag_name_new)}")
     if len(tag_name_new) > 0:
         # create new tag name
         insert_script = 'INSERT INTO CBTagName (TagName) ' \
