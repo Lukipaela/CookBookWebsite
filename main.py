@@ -7,12 +7,11 @@ from datetime import datetime
 import os  # used for accessing environment variables
 from random import randrange
 
-import recipe_forms
 # my classes
 from sqlite_handlers import execute_query, execute_insert_script, execute_update_script, execute_delete_script\
     , execute_general_sql
 from recipe_forms import RecipeHeaderForm, RecipeInstructionForm, RecipeIngredientForm, RecipeNutritionForm\
-    , RecipeSearchForm, RecipeTagForm
+    , RecipeSearchForm, RecipeTagForm, DatabaseForm, EmailRecipeForm
 import emailer
 
 
@@ -1167,7 +1166,7 @@ def delete_tag(recipe_id: str = NEW_RECORD_PAGE_INDEX):
 
 @app.route('/database', methods=["GET", "POST"])
 def database():
-    form = recipe_forms.DatabaseForm()
+    form = DatabaseForm()
     results = ""
     if request.method == 'POST':
         results = process_database_form(request.form)
@@ -1181,7 +1180,7 @@ def database():
 
 @app.route('/email_recipe', methods=["GET", "POST"])
 def email_recipe():
-    form = recipe_forms.EmailRecipeForm()
+    form = EmailRecipeForm()
     message = ""
     if request.method == 'POST':
         process_email_form(form)

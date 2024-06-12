@@ -7,14 +7,14 @@ Email Recipe Submission
 <!-- header data -->
 {% include "head_meta.html" %}
 
-
 <!-- specify html body content to insert into the 'base' template slot named content -->
 {% block content %}
     <div class="theme-background"></div>
 
+    <!-- Nav Bar -->
+    {% include "nav_buttons.html" %}
+
     <div class="body">
-        <!-- Nav Bar -->
-        {% include "nav_buttons.html" %}
 
         <!-- form -->
         <form method="POST" action="{{ url_for('email_recipe') }}" novalidate>

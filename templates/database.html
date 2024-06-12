@@ -7,16 +7,14 @@ Database Editor
 <!-- header data -->
 {% include "head_meta.html" %}
 
-
 <!-- specify html body content to insert into the 'base' template slot named content -->
 {% block content %}
     <div class="theme-background"></div>
 
+    <!-- Nav Bar -->
+    {% include "nav_buttons.html" %}
+
     <div class="body">
-
-        <!-- Nav Bar -->
-        {% include "nav_buttons.html" %}
-
         <form method="POST" action="{{ url_for('database') }}" novalidate>
             <div>{{ form.SQL_string.label(class="font-standard font-size-large") }}</div>
             <div>{{ form.SQL_string(class="text-area-entry") }}</div>
@@ -26,7 +24,6 @@ Database Editor
             <div class="font-standard">{{ form.response.label(class="font-standard font-size-large") }}</div>
             <div disabled>{{ form.response(class="text-area-entry", disabled="true") }}</div>
         </form>
-
         <br>
         <hr>
         <div class="font-standard font-size-standard font-bold">Database Structure:</div>
@@ -41,8 +38,6 @@ Database Editor
                 </div>
             </div>
         {% endfor %}
-
-
 
         <!-- Footer-->
         {% include "footer.html" %}
