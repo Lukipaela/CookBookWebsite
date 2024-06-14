@@ -11,11 +11,11 @@
 <!-- specify html body content to insert into the 'base' template slot named content -->
 {% block content %}
     <div class="theme-background"></div>
+
+    <!-- Nav Bar -->
+    {% include "nav_buttons.html" %}
+
     <div class="body">
-
-        <!-- Nav Bar -->
-        {% include "nav_buttons.html" %}
-
         <div class="editor-section font-standard font-size-standard">
             <div class="font-size-large font-highlight editor-section-title">EDIT INSTRUCTIONS</div>
             <div class="font-size-standard font-highlight editor-section-message">{{ banner_message }}</div>

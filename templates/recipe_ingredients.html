@@ -99,21 +99,23 @@
 <script>
 
     function increaseServingsClicked(){
-        var currentServingsNode = document.getElementsByClassName("JS-recipe-servings")[0];
-        var currentServings = Number(currentServingsNode.textContent);
+        var currentServingsNodes = document.getElementsByClassName("JS-recipe-servings");
+        var currentServings = Number(currentServingsNodes[0].textContent);
         var newServings = currentServings + 1;
         updateIngredientQuantities(currentServings, newServings);
-        currentServingsNode.textContent = newServings;
+        currentServingsNodes[0].textContent = newServings;
+        currentServingsNodes[1].textContent = newServings;
     }
 
     function decreaseServingsClicked(){
-        var currentServingsNode = document.getElementsByClassName("JS-recipe-servings")[0];
-        var currentServings = Number(currentServingsNode.textContent);
+        var currentServingsNodes = document.getElementsByClassName("JS-recipe-servings");
+        var currentServings = Number(currentServingsNodes[0].textContent);
         var newServings = currentServings;
         if (currentServings > 1)
             newServings = currentServings - 1;
         updateIngredientQuantities(currentServings, newServings);
-        currentServingsNode.textContent = newServings;
+        currentServingsNodes[0].textContent = newServings;
+        currentServingsNodes[1].textContent = newServings;
     }
 
     function updateIngredientQuantities(currentServings, newServings){
