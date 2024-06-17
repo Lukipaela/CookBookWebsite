@@ -1,10 +1,13 @@
 import sqlite3
 
+# Class variable
+prod_mode = True
+
 
 # -------------------- DB METHODS -------------------- #
 def execute_query(query_string: str, query_args=(), convert_to_dict=True):
-    print('QUERY:   ' + query_string)
-    print(f"args: {query_args}")
+    console_log('QUERY:   ' + query_string)
+    console_log(f"args: {query_args}")
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
@@ -16,11 +19,11 @@ def execute_query(query_string: str, query_args=(), convert_to_dict=True):
                 for row in result:
                     summary = dict(zip(columns, row))
                     results.append(summary)
-                print(results)
+                console_log(results)
                 return results
             else:
                 # if not requested in Dict form, return as a List, which is combobox-compatible if defined correctly
-                print(result)
+                console_log(result)
                 return result
     except sqlite3.Error as e:
         print('QUERY ERROR:   ' + e.args[0])
@@ -28,8 +31,8 @@ def execute_query(query_string: str, query_args=(), convert_to_dict=True):
 
 
 def execute_update_script(script_string: str, query_args=()):
-    print('UPDATE SCRIPT:   ' + script_string)
-    print(f"args: {query_args}")
+    console_log('UPDATE SCRIPT:   ' + script_string)
+    console_log(f"args: {query_args}")
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
@@ -40,8 +43,8 @@ def execute_update_script(script_string: str, query_args=()):
 
 
 def execute_insert_script(script_string: str, query_args=(), table_name: str = None, id_column: str = None):
-    print('INSERT SCRIPT:   ' + script_string)
-    print(f"args: {query_args}")
+    console_log('INSERT SCRIPT:   ' + script_string)
+    console_log(f"args: {query_args}")
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
@@ -51,7 +54,7 @@ def execute_insert_script(script_string: str, query_args=(), table_name: str = N
             if table_name is not None:
                 get_id = f"SELECT MAX({id_column}) FROM {table_name}"
                 result = db_cursor.execute(get_id).fetchall()[0][0]
-                print(f"new id: {result}")
+                console_log(f"new id: {result}")
                 return result
             else:
                 return None
@@ -61,8 +64,8 @@ def execute_insert_script(script_string: str, query_args=(), table_name: str = N
 
 
 def execute_delete_script(script_string: str, query_args=()):
-    print('DELETE SCRIPT:   ' + script_string)
-    print(f"args: {query_args}")
+    console_log('DELETE SCRIPT:   ' + script_string)
+    console_log(f"args: {query_args}")
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
@@ -73,13 +76,25 @@ def execute_delete_script(script_string: str, query_args=()):
 
 
 def execute_general_sql(sql_string):
-    print('GENERAL SQL:   ' + sql_string)
+    console_log('GENERAL SQL:   ' + sql_string)
     try:
         with sqlite3.connect("CookBookDatabase.db") as con:
             db_cursor = con.cursor()
             response = db_cursor.execute(sql_string).fetchall()
-            print(response)
+            console_log(response)
             return response
     except sqlite3.Error as e:
         print('GENERAL SQL ERROR:   ' + e.args[0])
         return e.args[0]
+
+
+def set_prod_mode(value: bool):
+    global prod_mode
+    prod_mode = value
+    print(f"SQL HANDLER - New prod mode: {prod_mode}")
+
+
+def console_log(value):
+    global prod_mode
+    if not prod_mode:
+        print(value)

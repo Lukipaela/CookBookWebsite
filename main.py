@@ -7,6 +7,7 @@ from datetime import datetime
 import os  # used for accessing environment variables
 from random import randrange
 
+import sqlite_handlers
 # my classes
 from sqlite_handlers import execute_query, execute_insert_script, execute_update_script, execute_delete_script\
     , execute_general_sql
@@ -33,7 +34,8 @@ DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod!
 prod_mode = True   # master toggle to switch between DEV and PROD modes
-
+# assign the value of prod_mode to the SQL handler to suppress printing
+sqlite_handlers.set_prod_mode(prod_mode)
 # create a lookup table for ElementID by NutritionNameID
 nutrition_units_by_name_id = {"1": 1, "2": 2, "3": 2, "4": 3, "5": 2, "6": 2, "7": 2, "8": 3, "9": 2}
 
@@ -187,9 +189,7 @@ def get_database_map():
                        "ORDER BY 1"
         query_args = (table["TableName"], )
         table_columns = execute_query(query_string, query_args)
-        print(table["TableName"])
         table_column_pairs[table["TableName"]] = table_columns
-        print(table_column_pairs)
     return table_column_pairs
 
 
@@ -509,7 +509,7 @@ def delete_recipe_tag(recipe_id: int, tag_id: int):
 
 # ------------------- FORM HANDLERS --------------------- #
 def configure_header_form(recipe_id: str, recipe_header: dict):
-    print(f"configuring header form for recipe_id: {recipe_id}")
+    console_log(f"configuring header form for recipe_id: {recipe_id}")
     form = RecipeHeaderForm()
     # Initialize Header Fields
     if recipe_id == NEW_RECORD_PAGE_INDEX:
@@ -533,7 +533,7 @@ def configure_header_form(recipe_id: str, recipe_header: dict):
 
 
 def configure_instruction_form(recipe_id: str, instruction_id: str, instructions: dict):
-    print(f"configuring instruction form for instruction_id: {instruction_id}")
+    console_log(f"configuring instruction form for instruction_id: {instruction_id}")
     form = RecipeInstructionForm()
     # Initialize instruction Fields
     if instruction_id == NEW_RECORD_PAGE_INDEX or instruction_id == DEFAULT_EDITOR_PAGE_INDEX:
@@ -555,7 +555,7 @@ def configure_instruction_form(recipe_id: str, instruction_id: str, instructions
 
 
 def configure_nutrition_form(recipe_id: str, nutrition_id: str, nutrition_facts: dict):
-    print(f"configuring nutrition form for nutrition_id: {nutrition_id}")
+    console_log(f"configuring nutrition form for nutrition_id: {nutrition_id}")
     form = RecipeNutritionForm()
     # Initialize instruction Fields
     nutrition_name_code = '1'
@@ -597,7 +597,7 @@ def configure_tags_form(recipe_id: int):
 
 
 def configure_ingredient_form(recipe_id: str, ingredient_id: str):
-    print(f"configuring ingredient form for ingredient_id: {ingredient_id}")
+    console_log(f"configuring ingredient form for ingredient_id: {ingredient_id}")
     form = RecipeIngredientForm()
     form.ingredient_id.data = ingredient_id
     form.recipe_id.data = recipe_id
@@ -681,8 +681,8 @@ def configure_search_form():
 
 
 def process_header_form(form):
-    print("processing header form: ")
-    print(form)
+    console_log("processing header form: ")
+    console_log(form)
     # pull data from the form
     recipe_name = form["recipe_name"]
     recipe_time = form["recipe_time"]
@@ -703,8 +703,8 @@ def process_header_form(form):
 
 
 def process_instruction_form(form):
-    print("processing instruction form: ")
-    print(form)
+    console_log("processing instruction form: ")
+    console_log(form)
     # pull data from the form
     recipe_id = form["recipe_id"]
     instruction_id = form["instruction_id"]
@@ -717,7 +717,7 @@ def process_instruction_form(form):
 
 
 def process_nutrition_form(form):
-    print("processing nutrition form: ")
+    console_log("processing nutrition form: ")
     # pull data from the form
     nutrition_name_code = form["nutrition_name"]
     nutrition_value = form["nutrition_value"]
@@ -737,7 +737,7 @@ def process_nutrition_form(form):
 
 
 def process_tag_form(form):
-    print("processing tag form: ")
+    console_log("processing tag form: ")
     # pull data from the form
     tag_name_code = form["tag_name"]
     tag_name_new = form["tag_name_new"]
@@ -747,7 +747,7 @@ def process_tag_form(form):
 
 
 def process_ingredient_form(form):
-    print("processing ingredient form: ")
+    console_log("processing ingredient form: ")
     # pull data from the form
     recipe_id = form["recipe_id"]
     ingredient_name_code = form["ingredient_name"]
@@ -790,7 +790,7 @@ def process_ingredient_form(form):
 
 
 def process_search_form(form):
-    print("processing search form: ")
+    console_log("processing search form: ")
     recipe_type = int(form['recipe_type'])
     ingredient_search_name = str(form['recipe_ingredient'])
     if ingredient_search_name == 'All':
@@ -902,10 +902,15 @@ def get_default_photo_by_recipe_type(recipe_type_code: int):
     return photo_location
 
 
+def console_log(value):
+    if not prod_mode:
+        print(value)
+
+
 # -------------------- APP ROUTES -------------------- #
 @app.route('/', methods=["GET"])
 def home():
-    print(f"{request.method} method request for home called")
+    console_log(f"{request.method} method request for home called")
     # get data for recent recipe widget
     site_stats = get_site_stats()
     category_cards = get_category_cards()
@@ -923,7 +928,7 @@ def home():
 
 @app.route('/recipe/<string:recipe_id>', methods=["GET"])
 def recipe(recipe_id: int):
-    print(f"{request.method} method request for recipe called with recipe_id: {recipe_id}")
+    console_log(f"{request.method} method request for recipe called with recipe_id: {recipe_id}")
     ingredients = get_ingredients(recipe_id)
     nutrition_facts = get_nutrition(recipe_id)
     recipe_instructions = get_instructions(recipe_id)
@@ -948,7 +953,7 @@ def recipe(recipe_id: int):
 
 @app.route('/edit_header/<string:recipe_id>', methods=["GET", "POST"])
 def edit_header(recipe_id: str = NEW_RECORD_PAGE_INDEX):
-    print(f"{request.method} method request for edit_header called with recipe_id: {recipe_id}")
+    console_log(f"{request.method} method request for edit_header called with recipe_id: {recipe_id}")
     if 'banner_message' in request.args:  # optional arg
         banner_message = request.args['banner_message']
     else:
@@ -989,8 +994,8 @@ def edit_instructions(recipe_id: str = NEW_RECORD_PAGE_INDEX):
         banner_message = request.args['banner_message']
     else:
         banner_message = ' '
-    print(f"{request.method} method request for edit_instructions called with recipe_id: {recipe_id} "
-          f"and instruction_id: {instruction_id}")
+    console_log(f"{request.method} method request for edit_instructions called with recipe_id: {recipe_id} "
+                f"and instruction_id: {instruction_id}")
     if request.method == 'POST':
         # commit those changes to the Database, if applicable overwrite recipe_id with newly generated value
         process_instruction_form(request.form)
@@ -1024,8 +1029,8 @@ def edit_instructions(recipe_id: str = NEW_RECORD_PAGE_INDEX):
 @app.route('/delete_instruction/<string:recipe_id>', methods=["GET"])
 def delete_instruction(recipe_id: str):
     instruction_id = request.args['instruction_id']
-    print(f"{request.method} method request for delete_instruction called with recipe_id: {recipe_id} "
-          f"and ingredient_id: {instruction_id}")
+    console_log(f"{request.method} method request for delete_instruction called with recipe_id: {recipe_id} "
+                f"and ingredient_id: {instruction_id}")
     delete_recipe_instruction(instruction_id)
     return redirect(url_for('edit_instructions', recipe_id=recipe_id, instruction_id=DEFAULT_EDITOR_PAGE_INDEX))
 
@@ -1037,8 +1042,8 @@ def edit_nutrition(recipe_id: int = NEW_RECORD_PAGE_INDEX):
     else:
         banner_message = ' '
     nutrition_id = request.args['nutrition_id']
-    print(f"{request.method} method request for edit_nutrition called with recipe_id: {recipe_id} "
-          f"and nutrition_id: {nutrition_id}")
+    console_log(f"{request.method} method request for edit_nutrition called with recipe_id: {recipe_id} "
+                f"and nutrition_id: {nutrition_id}")
     if request.method == 'POST':
         # commit those changes to the Database, if applicable overwrite recipe_id with newly generated value
         process_nutrition_form(request.form)
@@ -1071,8 +1076,8 @@ def edit_nutrition(recipe_id: int = NEW_RECORD_PAGE_INDEX):
 @app.route('/delete_nutrition/<string:recipe_id>', methods=["GET"])
 def delete_nutrition(recipe_id: str):
     nutrition_id = request.args['nutrition_id']
-    print(f"{request.method} method request for delete_nutrition called with recipe_id: {recipe_id} "
-          f"and ingredient_id: {nutrition_id}")
+    console_log(f"{request.method} method request for delete_nutrition called with recipe_id: {recipe_id} "
+                f"and ingredient_id: {nutrition_id}")
     delete_recipe_nutrition_fact(nutrition_id)
     update_badges(recipe_id)
     return redirect(url_for('edit_nutrition', recipe_id=recipe_id, nutrition_id=DEFAULT_EDITOR_PAGE_INDEX))
@@ -1085,8 +1090,8 @@ def edit_ingredients(recipe_id: str = NEW_RECORD_PAGE_INDEX):
     else:
         banner_message = ' '
     ingredient_id = request.args['ingredient_id']
-    print(f"{request.method} method request for edit_ingredients called with recipe_id: {recipe_id} "
-          f"and ingredient_id: {ingredient_id}")
+    console_log(f"{request.method} method request for edit_ingredients called with recipe_id: {recipe_id} "
+                f"and ingredient_id: {ingredient_id}")
     if request.method == 'POST':
         # commit those changes to the Database, if applicable overwrite recipe_id with newly generated value
         process_ingredient_form(request.form)
@@ -1119,8 +1124,8 @@ def edit_ingredients(recipe_id: str = NEW_RECORD_PAGE_INDEX):
 @app.route('/delete_ingredient/<string:recipe_id>', methods=["GET"])
 def delete_ingredient(recipe_id: str):
     ingredient_id = request.args['ingredient_id']
-    print(f"{request.method} method request for delete_ingredient called with recipe_id: {recipe_id} "
-          f"and ingredient_id: {ingredient_id}")
+    console_log(f"{request.method} method request for delete_ingredient called with recipe_id: {recipe_id} "
+                f"and ingredient_id: {ingredient_id}")
     delete_recipe_ingredient(ingredient_id)
     update_badges(recipe_id)
     return redirect(url_for('edit_ingredients', recipe_id=recipe_id, ingredient_id=DEFAULT_EDITOR_PAGE_INDEX))
@@ -1132,7 +1137,7 @@ def edit_tags(recipe_id: int = NEW_RECORD_PAGE_INDEX):
         banner_message = request.args['banner_message']
     else:
         banner_message = ' '
-    print(f"{request.method} method request for edit_tags called with recipe_id: {recipe_id}")
+    console_log(f"{request.method} method request for edit_tags called with recipe_id: {recipe_id}")
     if request.method == 'POST':
         process_tag_form(request.form)
         banner_message = 'New Tag saved!'
@@ -1158,8 +1163,8 @@ def edit_tags(recipe_id: int = NEW_RECORD_PAGE_INDEX):
 @app.route('/delete_tag/<string:recipe_id>', methods=["GET"])
 def delete_tag(recipe_id: str = NEW_RECORD_PAGE_INDEX):
     tag_id = request.args['tag_id']
-    print(f"{request.method} method request for delete_tag called with recipe_id: {recipe_id} "
-          f"and tag_id: {tag_id}")
+    console_log(f"{request.method} method request for delete_tag called with recipe_id: {recipe_id} "
+                f"and tag_id: {tag_id}")
     delete_recipe_tag(recipe_id, tag_id)
     return redirect(url_for('edit_tags', recipe_id=recipe_id, tag_id=DEFAULT_EDITOR_PAGE_INDEX))
 
@@ -1205,7 +1210,7 @@ def search():
         badge_name = request.args['badge_name']
     else:
         badge_name = None
-    print(f"{request.method} method request for search called with tag_name: {tag_name}")
+    console_log(f"{request.method} method request for search called with tag_name: {tag_name}")
     search_form = configure_search_form()
     message = ""
     search_results = []
