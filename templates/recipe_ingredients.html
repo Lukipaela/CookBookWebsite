@@ -8,10 +8,9 @@
     </div>
     <!-- INGREDIENT SECTION -->
 
-    <div class="background-secondary-color black-border-rounded">
+    <div class="background-secondary-color black-border-rounded JS-ingredient-list">
         <ul>
             <!-- TITLE / MULTIPLIER -->
-
             <li class="ingredient-row">
                 <div class="ingredient-name font-bold font-highlight font-size-subtitle">
                     Ingredients
@@ -143,7 +142,8 @@
     }
 
     function copyIngredientsToClipboard(){
-        var items = document.getElementsByClassName("checklist-item");
+    // there are two copies of the ingredient list in the dom, so only pull ingredients from the first copy.
+        var items = document.getElementsByClassName("JS-ingredient-list")[0].getElementsByClassName("checklist-item");
         var copiedText = "";
         var iterations = items.length;
         for (var i = 0; i < iterations; i++) {
