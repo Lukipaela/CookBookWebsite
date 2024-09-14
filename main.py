@@ -1,6 +1,5 @@
 # -------------------- IMPORTS -------------------- #
 from random import random, randrange
-
 from flask import Flask, render_template, request, redirect, url_for
 from flask_bootstrap import Bootstrap  # install with pip via terminal
 from datetime import datetime
