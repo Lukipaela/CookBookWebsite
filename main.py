@@ -32,7 +32,7 @@ LOW_CAL_THRESHOLD = 800  # meals under this calorie count are marked as low cal
 DEFAULT_EDITOR_PAGE_INDEX = '-1'
 NEW_RECORD_PAGE_INDEX = '0'
 # TODO set to true for prod!
-prod_mode = True   # master toggle to switch between DEV and PROD modes
+prod_mode = True  # master toggle to switch between DEV and PROD modes
 # assign the value of prod_mode to the SQL handler to suppress printing
 sqlite_handlers.set_prod_mode(prod_mode)
 # create a lookup table for ElementID by NutritionNameID
