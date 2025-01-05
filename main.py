@@ -107,6 +107,7 @@ def get_recent_recipes():
     query_string = "SELECT RecipeID " \
                    "FROM CBRecipe " \
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
+                   "WHERE Password IS NULL " \
                    "ORDER BY CreationGMT DESC " \
                    "LIMIT 10 "
     query_args = ()
@@ -118,7 +119,8 @@ def get_recipes_by_tag(tag_name: str):
                    "FROM CBRecipe " \
                    "JOIN CBTag ON CBTag.RecipeID = CBRecipe.RecipeID " \
                    "JOIN CBTagName ON CBTagName.TagID = CBTag.TagID " \
-                   "WHERE TagName = ? "
+                   "WHERE TagName = ? " \
+                   "AND Password IS NULL"
     query_args = (tag_name, )
     return get_card_data(query_string, query_args)
 
@@ -128,7 +130,8 @@ def get_recipes_by_badge(badge_name: str):
                    "FROM CBRecipe " \
                    "JOIN CBRecipeBadge ON CBRecipeBadge.RecipeID = CBRecipe.RecipeID " \
                    "JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID " \
-                   "WHERE BadgeName = ? "
+                   "WHERE BadgeName = ? " \
+                   "AND Password IS NULL"
     query_args = (badge_name, )
     return get_card_data(query_string, query_args)
 
@@ -137,7 +140,8 @@ def get_recipes_by_category(category: str):
     query_string = "SELECT RecipeID " \
                    "FROM CBRecipe " \
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
-                   "WHERE CBRecipeType.LongName = ? "
+                   "WHERE CBRecipeType.LongName = ? " \
+                   "AND Password IS NULL "
     query_args = (category, )
     return get_card_data(query_string, query_args)
 
@@ -146,6 +150,7 @@ def get_category_cards():
     query_string = "SELECT CBRecipeType.LongName CategoryName, PhotoUrl, COUNT(*) RecipeCount " \
                    "FROM CBRecipe " \
                    "JOIN CBRecipeType ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
+                   "WHERE Password IS NULL " \
                    "GROUP BY CBRecipeType.LongName " \
                    "HAVING CreationGMT = MAX(CreationGMT) "
     query_args = ()
@@ -156,6 +161,7 @@ def get_site_stats():
     query_string = "SELECT CBRecipeType.LongName 'Category', COUNT(*) 'Count', 1 " \
                    "FROM CBRecipeType " \
                    "JOIN CBRecipe ON CBRecipe.RecipeTypeID = CBRecipeType.RecipeTypeID " \
+                   "WHERE Password IS NULL " \
                    "GROUP BY CBRecipeType.LongName " \
                    "UNION SELECT 'TOTAL', COUNT(*), 0 " \
                    "FROM CBRecipe " \
@@ -166,7 +172,8 @@ def get_site_stats():
 
 def get_next_recipe_id(recipe_id):
     query_string = "SELECT MAX(Result) AS RecipeID FROM (" \
-                   "SELECT COALESCE(MIN(RecipeID), -1) Result FROM CBRecipe WHERE RecipeID > ? " \
+                   "SELECT COALESCE(MIN(RecipeID), -1) Result " \
+                   "FROM CBRecipe WHERE RecipeID > ? " \
                    "UNION SELECT MIN(RecipeID) Result FROM CBRecipe)"
     query_args = (recipe_id, )
     next_id = execute_query(query_string, query_args)
@@ -742,7 +749,7 @@ def process_tag_form(form):
     tag_name_new = form["tag_name_new"]
     recipe_id = form["recipe_id"]
     # add new record
-    nutrition_id = create_tag(recipe_id=recipe_id, tag_name_code=tag_name_code, tag_name_new=tag_name_new)
+    create_tag(recipe_id=recipe_id, tag_name_code=tag_name_code, tag_name_new=tag_name_new)
 
 
 def process_ingredient_form(form):
@@ -826,9 +833,10 @@ def process_search_form(form):
                    "AND CBIngredientName.SearchName LIKE ? " + badge_query_string + \
                    "LEFT JOIN CBTag ON CBTag.RecipeID = CBRecipe.RecipeID " \
                    "LEFT JOIN CBTagName ON CBTag.TagID = CBTagName.TagID " \
-                   "WHERE (RecipeName LIKE ? OR TagName LIKE ? ) " \
+                   "WHERE ((Password IS NULL AND (RecipeName LIKE ? OR TagName LIKE ? )) " \
+                   "OR Password = ?) " \
                    f"{recipe_type_query_string}"
-    query_args = (ingredient_search_name, search_keyword, search_keyword) + query_args_optional
+    query_args = (ingredient_search_name, search_keyword, search_keyword, form['search_term']) + query_args_optional
     return get_card_data(query_string, query_args)
 
 
