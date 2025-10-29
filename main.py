@@ -1,19 +1,18 @@
 # -------------------- IMPORTS -------------------- #
-from random import random, randrange
-from flask import Flask, render_template, request, redirect, url_for
-from flask_bootstrap import Bootstrap  # install with pip via terminal
-from datetime import datetime
 import os  # used for accessing environment variables
+from datetime import datetime
 from random import randrange
 
-import sqlite_handlers
-# my classes
-from sqlite_handlers import execute_query, execute_insert_script, execute_update_script, execute_delete_script\
-    , execute_general_sql
-from recipe_forms import RecipeHeaderForm, RecipeInstructionForm, RecipeIngredientForm, RecipeNutritionForm\
-    , RecipeSearchForm, RecipeTagForm, DatabaseForm, EmailRecipeForm
-import emailer
+from flask import Flask, render_template, request, redirect, url_for
+from flask_bootstrap import Bootstrap  # install with pip via terminal
 
+import emailer
+import sqlite_handlers
+from recipe_forms import RecipeHeaderForm, RecipeInstructionForm, RecipeIngredientForm, RecipeNutritionForm \
+    , RecipeSearchForm, RecipeTagForm, DatabaseForm, EmailRecipeForm
+# my classes
+from sqlite_handlers import execute_query, execute_insert_script, execute_update_script, execute_delete_script \
+    , execute_general_sql
 
 # -------------------- FLASK -------------------- #
 app = Flask(__name__)
@@ -235,15 +234,18 @@ def get_card_data(recipe_id_query: str, query_args: tuple):
 
 
 def update_header(recipe_id: str, new_recipe_name: str, new_recipe_time: int
-                  , new_recipe_servings: int, new_recipe_source: str, recipe_type_id: int):
+                  , new_recipe_servings: int, new_recipe_source: str, recipe_type_id: int
+                  , recipe_image: str):
     update_script = "UPDATE CBRecipe " \
                     'SET RecipeName = ?' \
                     ', CookingTime = ?' \
                     ', Servings = ?' \
                     ', Source = ? ' \
                     ', RecipeTypeID = ? ' \
+                    ', PhotoURL = ? ' \
                     'WHERE RecipeID = ?'
-    query_args = (new_recipe_name, new_recipe_time, new_recipe_servings, new_recipe_source, recipe_type_id, recipe_id)
+    query_args = (new_recipe_name, new_recipe_time, new_recipe_servings, new_recipe_source, recipe_type_id
+                  , recipe_image, recipe_id)
     execute_update_script(update_script, query_args)
 
 
@@ -380,12 +382,13 @@ def update_badges(recipe_id: int):
 
 
 def create_header(new_recipe_name: str, new_recipe_time: int
-                  , new_recipe_servings: int, new_recipe_source: str, new_creationGMT: str, recipe_type_id: str):
+                  , new_recipe_servings: int, new_recipe_source: str, new_creationGMT: str
+                  , recipe_type_id: str, recipe_image: str):
     # inserts a new record into the header table, brings back the new ID.
-    insert_script = 'INSERT INTO CBRecipe(RecipeName, CookingTime, Servings, Source, CreationGMT, RecipeTypeID)' \
-                    'SELECT ?, ?, ?, ?, ?, ? '
+    insert_script = 'INSERT INTO CBRecipe(RecipeName, CookingTime, Servings, Source, CreationGMT, RecipeTypeID, PhotoURL)' \
+                    'SELECT ?, ?, ?, ?, ?, ?, ? '
     query_args = (new_recipe_name, new_recipe_time, new_recipe_servings
-                  , new_recipe_source, new_creationGMT, recipe_type_id)
+                  , new_recipe_source, new_creationGMT, recipe_type_id, recipe_image)
     new_id = execute_insert_script(insert_script, query_args=query_args
                                    , table_name='CBRecipe', id_column='RecipeID')
 
@@ -523,6 +526,7 @@ def configure_header_form(recipe_id: str, recipe_header: dict):
         form.recipe_time.data = 1
         form.recipe_servings.data = 1
         form.recipe_source.data = ''
+        form.recipe_image.data = ''
         form.recipe_creationGMT.data = datetime.now()
         form.recipe_type.process_data(1)   # default CodeValue: dinner
         form.recipe_id.data = recipe_id
@@ -531,6 +535,7 @@ def configure_header_form(recipe_id: str, recipe_header: dict):
         form.recipe_time.data = recipe_header['CookingTime']
         form.recipe_servings.data = recipe_header['Servings']
         form.recipe_source.data = recipe_header['Source']
+        form.recipe_image.data = recipe_header['PhotoURL']
         form.recipe_creationGMT.data = recipe_header['CreationGMT']
         form.recipe_type.process_data(recipe_header['RecipeTypeID'])
         form.recipe_id.data = recipe_id
@@ -694,17 +699,19 @@ def process_header_form(form):
     recipe_time = form["recipe_time"]
     recipe_servings = form["recipe_servings"]
     recipe_source = form["recipe_source"]
+    recipe_image = form["recipe_image"]
     recipe_type_id = form["recipe_type"]
     recipe_id = form["recipe_id"]
     recipe_creationGMT = form["recipe_creationGMT"]
     if recipe_id != NEW_RECORD_PAGE_INDEX:
         update_header(recipe_id=recipe_id, new_recipe_name=recipe_name, new_recipe_time=recipe_time
                       , new_recipe_servings=recipe_servings, new_recipe_source=recipe_source
-                      , recipe_type_id=recipe_type_id)
+                      , recipe_type_id=recipe_type_id, recipe_image=recipe_image)
     else:
         recipe_id = create_header(new_recipe_name=recipe_name, new_recipe_time=recipe_time
                                   , new_recipe_servings=recipe_servings, new_recipe_source=recipe_source
-                                  , new_creationGMT=recipe_creationGMT, recipe_type_id=recipe_type_id)
+                                  , new_creationGMT=recipe_creationGMT, recipe_type_id=recipe_type_id
+                                  , recipe_image=recipe_image)
     return recipe_id
 
 

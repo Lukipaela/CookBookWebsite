@@ -1,7 +1,8 @@
 # imports
-from wtforms import validators, SubmitField, SelectField, StringField, IntegerField, DecimalField, TextAreaField\
-    , BooleanField, SelectMultipleField
 from flask_wtf import FlaskForm  # pip install Flask-WTF
+from wtforms import SubmitField, SelectField, StringField, IntegerField, DecimalField, TextAreaField \
+    , BooleanField
+
 from sqlite_handlers import execute_query
 
 
@@ -12,6 +13,8 @@ class RecipeHeaderForm(FlaskForm):
     recipe_time = IntegerField(label="Cooking Time")
     recipe_source = StringField(label="Source"
                                 , render_kw={"placeholder": "EG. Jimmy Needles or www.JimmyNeedles.com/recipe/1"})
+    recipe_image = StringField(label="Image URL "
+                                , render_kw={"placeholder": "EG. https://i.imgur.com/TacoPic"})
     __query_string = "SELECT RecipeTypeID, ShortName FROM CBRecipeType ORDER BY 2 ASC"
     __recipe_type_choices = execute_query(__query_string, convert_to_dict=False)
     recipe_type = SelectField(label="Recipe Type", choices=__recipe_type_choices)
