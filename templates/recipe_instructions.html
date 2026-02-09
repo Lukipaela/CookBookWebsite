@@ -4,7 +4,10 @@
         {% for step in recipe_instructions: %}
             <li class="instruction-row">
                 <div class="instruction-number black-border">{{ step['StepNumber'] }}</div>
-                <div class="instruction-text">{{ step['StepText'] }}</div>
+                <div class="instruction-text  {{ 'JS-step-' + step['StepNumber']|string }}"
+                     onclick="itemClicked('{{ 'JS-step-' + step['StepNumber']|string }}')">
+                    {{ step['StepText'] }}
+                </div>
             </li>
         {% endfor %}
     </ul>
@@ -14,3 +17,18 @@
         </div>
     {% endif %}
 </div>
+
+<!-- JS scripts -->
+<script>
+    function itemClicked(itemID){
+        var clickedItemArray = document.getElementsByClassName(itemID);
+        var iterations = clickedItemArray.length;
+        for (var i = 0; i < iterations; i++) {
+            var clickedItem = clickedItemArray[i];
+            if(clickedItem.classList.contains("checked-item"))
+                clickedItem.classList.remove("checked-item");
+            else
+                clickedItem.classList.add("checked-item");
+        }
+    }
+</script>

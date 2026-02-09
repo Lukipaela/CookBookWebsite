@@ -152,7 +152,7 @@
             var ingredientName = textElements[0].textContent.trim();
             copiedText += ingredientName.replace('*', '');
 
-            if( ingredientName != 'Salt' && ingredientName != 'Sea Salt' && ingredientName != 'Black Pepper' & textElements.length > 1){
+            if( ingredientName != 'Salt' && ingredientName != 'Sea Salt' && ingredientName != 'Black Pepper' && ingredientName != 'Water' & textElements.length > 1){
                 //ingredient quantity
                 copiedText += ' - ' + textElements[1].textContent.trim() + ' ';
                 if(textElements.length > 2){
