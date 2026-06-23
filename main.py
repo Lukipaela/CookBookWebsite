@@ -292,6 +292,7 @@ def update_badges(recipe_id: int):
                        ", COALESCE(MIN(Veg.IsVegetarian), 'Y') Vegetarian" \
                        ", COALESCE(Calories.NutritionValue, 9000) Calories" \
                        ", COALESCE(Fat.NutritionValue, 9000) Fat " \
+                       ", Servings " \
                        "FROM CBRecipe " \
                        "LEFT JOIN CBIngredient ON CBIngredient.RecipeID = CBRecipe.RecipeID " \
                        "LEFT JOIN CBIngredientName Veg ON Veg.IngredientNameID = CBIngredient.IngredientNameID " \
@@ -379,6 +380,30 @@ def update_badges(recipe_id: int):
                             "WHERE RecipeID = ? AND BadgeID = ? "
             query_args = (recipe_id, badge_id_veggie)
             execute_delete_script(delete_script, query_args)
+
+        if badge_stats["Servings"] > 2:
+            badge_name = "Large Recipe"
+            insert_script = 'INSERT INTO CBRecipeBadge (RecipeID, BadgeID) ' \
+                            'SELECT ?, BadgeID ' \
+                            'FROM CBBadge ' \
+                            'WHERE BadgeName = ? ' \
+                            'AND (SELECT Count(*) FROM CBRecipeBadge ' \
+                            'JOIN CBBadge ON CBBadge.BadgeID = CBRecipeBadge.BadgeID ' \
+                            'AND BadgeName = ? ' \
+                            'WHERE RecipeID = ?) ' \
+                            '= 0'
+            query_args = (recipe_id, badge_name, badge_name, recipe_id)
+            execute_insert_script(insert_script, query_args)
+        else:
+            badge_id_veggie = 5
+            delete_script = "DELETE " \
+                            "FROM CBRecipeBadge " \
+                            "WHERE RecipeID = ? AND BadgeID = ? "
+            query_args = (recipe_id, badge_id_veggie)
+            execute_delete_script(delete_script, query_args)
+
+
+
 
 
 def create_header(new_recipe_name: str, new_recipe_time: int
